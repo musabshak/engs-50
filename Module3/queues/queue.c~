@@ -1,0 +1,25 @@
+/* queue.c --- 
+ * 
+ * 
+ * Author: Selim Hassairi
+ * Created: Fri Oct  4 13:51:47 2019 (-0400)
+ * Version: 
+ * 
+ * Description: 
+ * 
+ */
+
+#include <queue.h>
+
+struct Node {
+	int data;
+	struct Node *next;
+};
+
+struct Queue {
+	struct Node = *front;
+	struct Node = *back;
+	uint32_t size;
+};
+
+
