@@ -9,27 +9,33 @@
  * 
  */
 
+#include <queue.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-struct Node {
+typedef struct node {
 	int data;
 	struct Node *next;
-};
+} node_t;
 
-struct Queue {
-	struct Node *front;
-	struct Node *back;
+
+struct queue_t {
+	node_t *front;
+	node_t *back;
 	int size;
 };
 
-struct Queue* qopen(void){
-struct  Queue q;
-q->front= NULL;
-q->back=NULL;
-q->size = 0;
-return q;
+queue_t* qopen(void){
+	queue_t* q;
+	if(!(q = (queue_t*)malloc(sizeof(queue_t)))){
+		printf("[Error malloc failed allocating q\n]");
+		return NULL;
+	}	
+	q->front=NULL;
+	q->back=NULL;
+	q->size = 0;
+	return q;
 }
 
-void main() {
 
-}
 
