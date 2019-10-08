@@ -14,8 +14,8 @@ do
 		 echo "test${i} has leaks"
 		 leaks=True
 	fi
-
-	if [[ errors = "False" && leaks = "False" ]] ; then
+	
+	if [[ $errors = "False" && $leaks = "False" ]] ; then
 		 echo "test${i} terminates without any leaks or errors"
 	fi
 done

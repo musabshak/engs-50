@@ -33,6 +33,8 @@ int main(void) {
 	if (result1 == NULL) {
 		exit(EXIT_FAILURE);
 	}
-
+	free(car1p);
+	free(car2p);
+	free(car3p);
 	exit(EXIT_SUCCESS);
 }

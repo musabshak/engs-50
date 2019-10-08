@@ -28,6 +28,7 @@ int main(void) {
 	if (result != 0) {
 		exit(EXIT_FAILURE);
 	}
-	
+
+	free(car1p);
 	exit(EXIT_SUCCESS);
 }

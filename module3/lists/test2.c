@@ -30,5 +30,7 @@ int main(void) {
 		exit(EXIT_FAILURE);
 	}
 
+	free(car1p);
+	free(car2p);
 	exit(EXIT_SUCCESS);
 }

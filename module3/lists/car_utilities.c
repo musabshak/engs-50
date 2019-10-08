@@ -29,6 +29,10 @@ car_t * make_car(char *plate, double price, int year) {
   return pp;
 }
 
+void free_car(car_t *cp) {
+	free(cp);
+}
+
 void printcar(car_t *p) {
   printf("plate: %s, price: %lf, year: %d\n", p->plate, p->price, p->year);
 }
