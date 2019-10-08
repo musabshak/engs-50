@@ -5,12 +5,12 @@ leaks=False
 
 for i in {1..10}
 do
-	if [[ $(valgrind --leak-check=full test${i} | grep "ERROR SUMMARY: [1-9]* errors") != "" ]] ; then
+	if [[ $(valgrind --leak-check=full test${i} 2>&1 | grep -c "0 errors") -eq 0 ]] ; then
 		 echo "test${i} terminates with an error"
 		 errors=True
 	fi
 
-	if [[ $(valgrind --leak-check=full test${i} | grep "still reachable: [1-9]* bytes") != "" ]] ; then
+	if [[ $(valgrind --leak-check=full test${i} 2>&1 | grep -c "no leaks are possible") -eq 0 ]] ; then
 		 echo "test${i} has leaks"
 		 leaks=True
 	fi

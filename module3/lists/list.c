@@ -63,7 +63,7 @@ car_t *lremove(char *platep) {
 			else if (p == front) { // element to be removed is at beginning
 				front = front->next;
 			}
-			else {
+			else { // element in middle
 				f->next = p->next;
 			}
 			return p;

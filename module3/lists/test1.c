@@ -18,7 +18,7 @@
 
 
 int main(void) {
-
+	
 	car_t *car1p = make_car("554HEY", 5000, 1998);
 	
 	int32_t result = lput(car1p);
@@ -28,6 +28,6 @@ int main(void) {
 	if (result != 0) {
 		exit(EXIT_FAILURE);
 	}
-
+	
 	exit(EXIT_SUCCESS);
 }
