@@ -43,7 +43,7 @@ queue_t* qopen(void) {
 	if (!(qp = (queue_t *) malloc(sizeof(queue_t)))) {
 		return NULL;
 	}
-	printf("hello\n");
+
 	return qp;
 }
 
@@ -67,11 +67,9 @@ int32_t qput(queue_t *qp, void *elementp) {
 }
 
 void* qget(queue_t *qp) {
-	void *tmp = qp->front->data;
 	qp->front = qp->front->next;
-	printf("here\n");
 	
-	return tmp;
+	return qp->front->data;
 }
 
 void qapply(queue_t *qp, void(*fn)(void* elementp)) {
@@ -88,9 +86,7 @@ void* qsearch(queue_t *qp,
 	node_t *np;
 
 	for (np=qp->front; np!=NULL; np=np->next) {
-
-//TODO: figuring outsearchfn parameters + keys 
-		if (searchfn(np->data, "hi")) {
+		if (searchfn(np->data)) {
 			return np->data;
 		}
 	}
@@ -105,8 +101,7 @@ void* qremove(queue_t *qp,
 	node_t *nf;
 
 	for (np=qp->front; np!=NULL; np=np->next) {
-//TODO: figuring outsearchfn parameters + keys 
-		if (searchfn(np->data, "hi")) {
+		if (searchfn(np->data)) {
 			if (qp->back==np) { // element at end
 				nf->next = NULL;
 				qp->back = np;
