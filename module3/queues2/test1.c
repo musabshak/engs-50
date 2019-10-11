@@ -53,19 +53,18 @@ bool search_age(void* elementp, const void* keyp) {
 }
 
 int main(void) {
-	person_t *pp4, *pp5, *pp6;
+	person_t *pp1, *pp2, *pp3, *pp4, *pp5, *pp6;
 	queue_t *qp;
 	queue_t *qp2;
-	queue_t *qp3;
+	//queue_t *qp3;
 
 	qp = qopen();
-	/*pp1 = make_person("Fred", 20, 40.0);
+	pp1 = make_person("Fred", 20, 40.0);
 	pp2 = make_person("Ali", 22, 100);
 	pp3 = make_person("Suraj", 18, 50);
 	qput(qp, pp1);
 	qput(qp, pp2);
-	qput(qp, pp3);*/
-
+	qput(qp, pp3);
 	qp2 = qopen();
 	pp4 = make_person("1", 1, 1);
 	pp5 = make_person("2", 2, 2);
@@ -74,19 +73,17 @@ int main(void) {
 	qput(qp2, pp5);
 	qput(qp2, pp6);
 
-	qp3 = qopen();
-	qconcat(qp, qp3);
+	//qp3 = qopen();
+	qconcat(qp, qp2);
 
 	qapply(qp, printelement);
 
-	/*free(pp1);
+	free(pp1);
 	free(pp2);
-	free(pp3);*/
+	free(pp3);
 	free(pp4);
 	free(pp5);
 	free(pp6);
 	qclose(qp);
-	qclose(qp2);
-	qclose(qp3);
 	
 }
