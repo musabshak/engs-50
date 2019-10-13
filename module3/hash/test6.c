@@ -91,8 +91,7 @@ int main() {
 	hput(htp1, pp8, pp8->name, 2);
 	hput(htp1, pp9, pp9->name, 5); 
 
-	
-	//happly(htp1, print_htp_element);
+	happly(htp1, print_htp_element);
 
 	hclose(htp1);
 	

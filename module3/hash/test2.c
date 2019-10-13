@@ -91,8 +91,22 @@ int main() {
 	hput(htp1, pp8, pp8->name, 2);
 	hput(htp1, pp9, pp9->name, 5); 
 
-	
-	//happly(htp1, print_htp_element);
+
+	int res = -1;   
+	//Test Search
+	if ((person_t*)hsearch(htp1,search_name,"Selim",5)){
+		if (strcmp(((person_t*)hsearch(htp1,search_name,"Selim",5))->name,pp9->name)==0){
+			printf("Perfect, found : %s \n", pp9->name);
+			res = 0;
+		}
+		else {
+			printf("There is no such person\n");
+		} 
+	}
+	else {
+		printf("There is no such person\n");
+	}
+
 
 	hclose(htp1);
 	
@@ -106,7 +120,8 @@ int main() {
 	free(pp8);
 	free(pp9);
 	
-	exit(EXIT_SUCCESS);
+  if (res==0){exit(EXIT_SUCCESS);}                                                     
+  else {exit(EXIT_FAILURE);} 
 
 }
 

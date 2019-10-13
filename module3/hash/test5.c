@@ -89,10 +89,11 @@ int main() {
 	hput(htp1, pp6, pp6->name, 5);
 	hput(htp1, pp7, pp7->name, 8);
 	hput(htp1, pp8, pp8->name, 2);
-	hput(htp1, pp9, pp9->name, 5); 
+	//hput(htp1, pp9, pp9->name, 5); 
 
-	
-	//happly(htp1, print_htp_element);
+
+	//Test Remove
+	hremove(htp1,search_name,"Selim",5);
 
 	hclose(htp1);
 	
