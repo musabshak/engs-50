@@ -50,11 +50,12 @@ person_t* make_person(char *name, int age, double rate) {
 	return personp;
 }
 
-bool search_age(void* elementp, const void* keyp) {
+bool search_name(void* elementp, const void* keyp) {
 	person_t *pp = (person_t *) elementp;
-	int *age = (int *) keyp;
-	
-	if (pp->age == *age)  {
+	char name[20];
+	strcpy(name, keyp);
+
+	if (strcmp(pp->name,name)==0)  {
 		return true;
 	}
 	else {
@@ -68,13 +69,15 @@ int main() {
 	hashtable_t *htp1;
 
 	person_t *pp1 = make_person("Fred", 20, 50);
-	person_t *pp2 = make_person("Farid", 40, 100);
+	person_t *pp2 = make_person("Farid", 90, 100);
 	person_t *pp3 = make_person("Farrukh", 50, 150);
 	person_t *pp4 = make_person("Alan", 20, 50);
 	person_t *pp5 = make_person("Stjep", 40, 100);
 	person_t *pp6 = make_person("Maria", 50, 150);
 	person_t *pp7 = make_person("Shakeela", 50, 150);
 	person_t *pp8 = make_person("El", 50, 150);
+	person_t *pp9 = make_person("Selim", 19, 150);
+
 	
 	htp1 = hopen(8);
  
@@ -86,9 +89,39 @@ int main() {
 	hput(htp1, pp6, pp6->name, 5);
 	hput(htp1, pp7, pp7->name, 8);
 	hput(htp1, pp8, pp8->name, 2);
+	//hput(htp1, pp9, pp9->name, 5); 
+
+	//Test Search
+	if ((person_t*)hsearch(htp1,search_name,"Selim",5)){
+		if (strcmp(((person_t*)hsearch(htp1,search_name,"Selim",5))->name,pp9->name)==0){
+			printf("Perfect, found : %s \n", pp9->name);
+		}
+		else {
+			printf("There is no such person\n");
+		} 
+	}
+	else {
+		printf("There is no such person\n");
+	}
+
+	//Test Remove
+	hremove(htp1,search_name,"Selim",5);
+
+
+  if ((person_t*)hsearch(htp1,search_name,"Selim",5)){
+		if (strcmp(((person_t*)hsearch(htp1,search_name,"Selim",5))->name,pp9->name)==0){
+			printf("Perfect, found : %s \n", pp9->name);
+    }
+		else {
+			printf("There is no such person\n");
+    }
+	}
 	
-	
-	happly(htp1, print_htp_element);
+  else {
+    printf("There is no such person\n");
+	} 
+
+	//happly(htp1, print_htp_element);
 
 	hclose(htp1);
 	
@@ -100,6 +133,7 @@ int main() {
 	free(pp6);
 	free(pp7);
 	free(pp8);
+	free(pp9);
 	
 	exit(EXIT_SUCCESS);
 

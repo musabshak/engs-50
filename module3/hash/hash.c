@@ -121,3 +121,30 @@ void hclose(hashtable_t *htp) {
 	
 }
 
+void *hsearch(hashtable_t *htp,
+							bool (*searchfn)(void* elementp, const void* searchkeyp),
+							const char *key,int32_t keylen){
+
+  uint32_t index = SuperFastHash(key, keylen, htp->size);
+
+	if (htp->htable[index] == NULL) {
+		return NULL;
+	}
+	
+	return qsearch(htp->htable[index],searchfn,key);
+
+}
+
+void *hremove(hashtable_t *htp,
+							bool (*searchfn)(void* elementp, const void* searchkeyp),
+							const char *key,
+							int32_t keylen){
+	uint32_t index = SuperFastHash(key, keylen, htp->size);
+	//If no queue there
+	if (htp->htable[index] == NULL) {
+		return NULL;                                                                  
+	}
+	//Remove element if element is in q or not
+	return	qremove(htp->htable[index],searchfn,key);
+		
+}
