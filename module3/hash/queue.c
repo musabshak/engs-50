@@ -62,7 +62,6 @@ void qclose(queue_t *qp) {
 	free(qp);
 }
 
-
 int32_t qput(queue_t *qp, void *elementp) {
 	node_t *nodep = data_to_node(elementp);
 
@@ -132,7 +131,12 @@ void* qremove(queue_t *qp,
 
 	for (np=qp->front; np!=NULL; np=np->next) {
 		if (searchfn(np->data, skeyp)) {
-			if (qp->back==np) { // element at end
+			if (qp->front == qp->back) { // only element
+				qp->front = NULL;
+				qp->back = NULL;
+			}
+			
+			else if (qp->back==np) { // element at end
 				nf->next = NULL;
 				qp->back = nf;
 			}

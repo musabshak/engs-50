@@ -1,7 +1,7 @@
 CFLAGS=-Wall -pedantic -std=c11 -I. -g
 PROGRAM=queue
 
-all: test1 test2 test3 test4 test5 test6 
+all: test1 test2 test3 test4 test5 test6 test7 test8
 
 hash.o: hash.c queue.h
 	gcc $(CFLAGS) -c hash.c
@@ -45,7 +45,19 @@ test6.o: test6.c hash.h queue.h queue.c
 test6: test6.o hash.o queue.o
 	gcc $(CFLAGS) test6.o queue.o hash.o -o $@
 
+test7.o: test7.c hash.h queue.h queue.c
+	gcc $(CFLAGS) -c test7.c
+
+test7: test7.o hash.o queue.o
+	gcc $(CFLAGS) test7.o queue.o hash.o -o $@
+
+test8.o: test8.c hash.h queue.h queue.c
+	gcc $(CFLAGS) -c test8.c
+
+test8: test8.o hash.o queue.o
+	gcc $(CFLAGS) test8.o queue.o hash.o -o $@
+
 
 clean:
-	rm -f *.o test1
+	rm -f *.o test1 test2 test3 test4 test5 test6 test7 test8
 

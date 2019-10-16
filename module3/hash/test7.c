@@ -79,7 +79,7 @@ int main() {
 	person_t *pp9 = make_person("Selim", 19, 150);
 
 	
-	htp1 = hopen(8);
+	htp1 = hopen(10);
  
 	hput(htp1, pp1, pp1->name, 4);
 	hput(htp1, pp2, pp2->name, 5);
@@ -91,8 +91,32 @@ int main() {
 	hput(htp1, pp8, pp8->name, 2);
 	hput(htp1, pp9, pp9->name, 5); 
 
+	printf("hi\n");
+	happly(htp1, print_queue_element);
+	printf("hello\n");
 	
-	happly(htp1, print_htp_element);
+	printf("%d\n", strcmp(((person_t *) hsearch(htp1, search_name, "Fred", 4))->name, pp1->name));
+	printf("%d\n", strcmp(((person_t *) hsearch(htp1, search_name, "Farid", 5))->name, pp2->name));
+	printf("%d\n", strcmp(((person_t *) hsearch(htp1, search_name, "Farrukh", 7))->name, pp3->name));
+	printf("%d\n", strcmp(((person_t *) hsearch(htp1, search_name, "Alan", 4))->name, pp4->name));
+	printf("%d\n", strcmp(((person_t *) hsearch(htp1, search_name, "Stjep", 5))->name, pp5->name));
+	printf("%d\n", strcmp(((person_t *) hsearch(htp1, search_name, "Maria", 5))->name, pp6->name));
+	printf("%d\n", strcmp(((person_t *) hsearch(htp1, search_name, "Shakeela", 8))->name, pp7->name));
+	printf("%d\n", strcmp(((person_t *) hsearch(htp1, search_name, "El", 2))->name, pp8->name));
+	printf("%d\n", strcmp(((person_t *) hsearch(htp1, search_name, "Selim", 5))->name, pp9->name));
+	
+	hremove(htp1, search_name, "Fred", 4);
+	hremove(htp1, search_name, "Farid", 5);
+	hremove(htp1, search_name, "Farrukh", 7);
+	hremove(htp1, search_name, "Alan", 4);
+	hremove(htp1, search_name, "Stjep", 5);
+	hremove(htp1, search_name, "Maria", 5);
+	hremove(htp1, search_name, "Shakeela", 8);
+	hremove(htp1, search_name, "El", 2);
+	hremove(htp1, search_name, "Selim", 5);
+	
+	printf("---\n");
+	happly(htp1, print_queue_element);
 
 	hclose(htp1);
 	

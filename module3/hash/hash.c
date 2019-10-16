@@ -1,5 +1,6 @@
 /* 
  * hash.c -- implements a generic hash table as an indexed set of queues.
+Author: Musab Shakeel (12:50)
  *
  */
 #include <stdint.h>
@@ -102,9 +103,13 @@ void happly(hashtable_t *htp, void (*fn)(void* ep)) {
 	int i = 0;
 
 	while (i<htp->size) {
-		fn(htp->htable[i]);
+		queue_t * qp = htp->htable[i];
+		qapply(qp, fn);
+		//fn(htp->htable[i]);
+		printf("\n");
 		i+=1;
 	}
+	
 }
 
 void hclose(hashtable_t *htp) {
@@ -138,13 +143,18 @@ void *hsearch(hashtable_t *htp,
 void *hremove(hashtable_t *htp,
 							bool (*searchfn)(void* elementp, const void* searchkeyp),
 							const char *key,
-							int32_t keylen){
+							int32_t keylen) {
+
 	uint32_t index = SuperFastHash(key, keylen, htp->size);
 	//If no queue there
 	if (htp->htable[index] == NULL) {
-		return NULL;                                                                  
+		return NULL;                                                                
 	}
+	
 	//Remove element if element is in q or not
-	return	qremove(htp->htable[index],searchfn,key);
+	void *person = qremove(htp->htable[index],searchfn,key);
+
+	
+	return person;
 		
 }
