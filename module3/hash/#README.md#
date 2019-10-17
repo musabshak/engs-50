@@ -4,6 +4,8 @@ test3: tests looking for a person in the hashmap that doesnt exist \n
 test4: tests removing a person from the hashmap \n 
 test5: tests removing a person from the hashmap that doesnt exist \n
 test6: tests applying a function to the elements in the hash, here printing their names \n
-what about this?
+<<<<<<< HEAD
+77;20904;0cwhat about this?
+=======
 Hey test
-added here and want to leave this
+>>>>>>> 89d31ae74e051ca8ea20e05d3e06a42d2cd79c3e
