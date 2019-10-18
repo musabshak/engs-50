@@ -1,7 +1,7 @@
 CFLAGS=-Wall -pedantic -std=c11 -I. -g
 PROGRAM=queue
 
-all: test1 test2 test3 test4 test5 test6 test7 test8
+all: test1 test2 test3 test4 test5 test6 test7 test8 
 
 hash.o: hash.c queue.h
 	gcc $(CFLAGS) -c hash.c

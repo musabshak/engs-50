@@ -106,7 +106,7 @@ void happly(hashtable_t *htp, void (*fn)(void* ep)) {
 		queue_t * qp = htp->htable[i];
 		qapply(qp, fn);
 		//fn(htp->htable[i]);
-		printf("\n");
+		//printf("\n");
 		i+=1;
 	}
 	

@@ -64,64 +64,42 @@ bool search_name(void* elementp, const void* keyp) {
 	
 }
 
+void print_string(void *elementp) {
+	printf("%s; ", (char *) elementp);
+}
+
+bool search_string(void *elementp, const void* searchkeyp) {
+	return strcmp((char*) elementp, (char *) searchkeyp);
+}
+
 int main() {
 
 	hashtable_t *htp1;
 
-	person_t *pp1 = make_person("Fred", 20, 50);
-	person_t *pp2 = make_person("Farid", 90, 100);
-	person_t *pp3 = make_person("Farrukh", 50, 150);
-	person_t *pp4 = make_person("Alan", 20, 50);
-	person_t *pp5 = make_person("Stjep", 40, 100);
-	person_t *pp6 = make_person("Maria", 50, 150);
-	person_t *pp7 = make_person("Shakeela", 50, 150);
-	person_t *pp8 = make_person("El", 50, 150);
-	person_t *pp9 = make_person("Selim", 19, 150);
+ 
+	htp1 = hopen(3);
+
+	char str1[10] = "hello1";
+	char str2[10] = "hello2";
+	char str3[10] = "hello3";
+ 
+	hput(htp1, str1, str1, sizeof(str1) );
+	hput(htp1, str2, str2, sizeof(str2) );
+	hput(htp1, str3, str3, sizeof(str3) );
 
 	
-	htp1 = hopen(8);
- 
-	hput(htp1, pp1, pp1->name, 4);
-	hput(htp1, pp2, pp2->name, 5);
-	hput(htp1, pp3, pp3->name, 7);
-	hput(htp1, pp4, pp4->name, 4);
-	hput(htp1, pp5, pp5->name, 5);
-	hput(htp1, pp6, pp6->name, 5);
-	hput(htp1, pp7, pp7->name, 8);
-	hput(htp1, pp8, pp8->name, 2);
-	hput(htp1, pp9, pp9->name, 5); 
+	happly(htp1, print_string);
+		
+	printf("---\n");
 
 
-	int res = -1;   
-	//Test Search
-	if ((person_t*)hsearch(htp1,search_name,"Selim",5)){
-		if (strcmp(((person_t*)hsearch(htp1,search_name,"Selim",5))->name,pp9->name)==0){
-			printf("Perfect, found : %s \n", pp9->name);
-			res = 0;
-		}
-		else {
-			printf("There is no such person\n");
-		} 
-	}
-	else {
-		printf("There is no such person\n");
-	}
+	char *tmp = (char *) hsearch(htp1, search_string, str1, sizeof(str1));
+	printf("FOUND: %s\n", tmp);
 
 
 	hclose(htp1);
-	
-	free(pp1);
-	free(pp2);
-	free(pp3);
-	free(pp4);
-	free(pp5);
-	free(pp6);
-	free(pp7);
-	free(pp8);
-	free(pp9);
-	
-  if (res==0){exit(EXIT_SUCCESS);}                                                     
-  else {exit(EXIT_FAILURE);} 
+		
+	exit(EXIT_SUCCESS);
 
 }
 
