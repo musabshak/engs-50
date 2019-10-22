@@ -16,10 +16,12 @@
 #include <webpage.h>
 #include <stdbool.h>
 #include <string.h>
-
+#include <stdint.h>
+#include <unistd.h>
+#include <sys/stat.h> // For stat; checking if directory exists
 
 void print_webpage(void *page) {
-	printf("URL: %s\n", webpage_getURL((webpage_t *) page));
+	printf("queue_url: %s\n", webpage_getURL( (webpage_t *) page) );
 }
 
 void print_urlstring(void *elementp) {
@@ -39,30 +41,56 @@ void free_the_urls(void *elementp) {
 	free(elementp);
 }
 
-int main() {
-	char seed_url[100] = "https://thayer.github.io/engs50/";
+/*
+ * Function to check whether a directory exists or not.
+ * It returns 1 if given path is directory and  exists 
+ * otherwise returns 0.
+ * https://codeforwin.org/2018/03/c-program-check-file-or-directory-exists-not.html
+ */
+bool isDirectoryExists(const char *path)
+{
+    struct stat stats;
 
-	// Create new webpage
-	webpage_t *first_page = webpage_new(seed_url, 0, NULL);
+    stat(path, &stats);
 
-	// Fetch html content associated with webpage url and store in webpage attribute: html
-	if (!webpage_fetch(first_page)) {
-		exit(EXIT_FAILURE);
+    // Check for file existence
+    if (S_ISDIR(stats.st_mode))
+        return true;
+
+    return false;
+}
+
+int32_t pagesave(webpage_t *pagep, int id, char *dirname) {
+	FILE *fp;
+	char full_path[100];
+	sprintf(full_path, "%s/%d", dirname, id);
+
+	// printf("%s\n", full_path);
+
+	fp = fopen(full_path, "w");
+	if (fp==NULL) {
+		printf("Error: file unable to be created!\n");
+		return 1;
 	}
 
-	/*
-	Scan fetched html content from seed page; create and store in a queue a webpage 
-  for each internal URL found
-	*/
-	queue_t *webpages_qp = qopen();
+	fprintf(fp,
+					"%s\n%d\n%d\n%s\n",
+					webpage_getURL(pagep),
+					webpage_getDepth(pagep),
+					webpage_getHTMLlen(pagep),
+					webpage_getHTML(pagep));
+
+	fclose(fp);
+	
+	return 0;
+}
+
+void expand(hashtable_t *seen_urls_hp, queue_t *webpages_qp, webpage_t *pagep, int depth) {
 	int pos = 0;
 	char *url_result;
-
-	// Hashtable of seen URLs
-	hashtable_t *seen_urls_hp = hopen(7);
 	
 	// webpage_getNextURL() mallocs url_result that user needs to free
-	while ( (pos = webpage_getNextURL(first_page, pos, &url_result) ) > 0) {
+	while ( (pos = webpage_getNextURL(pagep, pos, &url_result) ) > 0) {
 		printf("Found %s URL: %s\n",
 				    IsInternalURL(url_result) ? "Internal" : "External",
 				    url_result);
@@ -73,34 +101,88 @@ int main() {
 			seen = true;
 		}
 		
-		if (IsInternalURL(url_result) && !seen ) {
+		if (IsInternalURL(url_result) && !seen) {
 			hput(seen_urls_hp, url_result, url_result, sizeof(url_result));
-			qput(webpages_qp, webpage_new(url_result, 1, NULL));
+			qput(webpages_qp, webpage_new(url_result, depth, NULL));
 		 }
-		else {
-			char *external_link = url_result;
-			free(external_link);
+		else { // Free the urls (external or seen) that don't make it into the hashtable
+			char *tmp = url_result;
+			free(tmp);
 		}
 	}
-	
-	// Print hashtable of seen urls
-	//happly(seen_urls_hp, print_urlstring);
+}
+					
+int main(int argc, char *argv[]) {
+	char usage[50] = "usage: crawler <seedurl> <pagedir> <maxdepth>";
 
-	// Free the URLs
+	if (argc != 4) {
+		printf("%s\n", usage);
+		exit(EXIT_FAILURE);
+	}
+			
+	if (!isDirectoryExists(argv[2])) {
+		printf("The specified directory (%s) does not exist\n", argv[2]);
+		exit(EXIT_FAILURE);
+  }
+
+	if (atoi(argv[3]) < 0) {
+		printf("maxdepth should be > 0\n");
+		exit(EXIT_FAILURE);
+	}
+
+	char *seed_url = argv[1];
+	char *pagedir = argv[2];
+	int max_depth = atoi(argv[3]);
+
+	hashtable_t *seen_urls_hp = hopen(30);
+	queue_t *webpages_qp = qopen();
+
+	webpage_t *first_page = webpage_new(seed_url, 0, NULL);
+	qput(webpages_qp, first_page);
+	hput(seen_urls_hp, seed_url, seed_url, sizeof(seed_url));	
+
+	char *result1 = (char *) hsearch(seen_urls_hp, search_for_url, seed_url, sizeof(seed_url));
+	printf("RESULT: %s\n", result1);
+
+	int id = 1;
+	webpage_t *pagep = (webpage_t *) qget(webpages_qp);
+	while (pagep != NULL) {
+		
+		if (!webpage_fetch(pagep)) {
+			printf("UNABLE TO FETCH PAGE\n");
+		}
+		else {
+			if (pagesave(pagep, id, pagedir) != 0) {
+				exit(EXIT_FAILURE);
+			}
+
+			int current_depth = webpage_getDepth(pagep);
+			printf("%d\n", current_depth);
+			if (current_depth < max_depth) {
+				expand(seen_urls_hp, webpages_qp, pagep, current_depth+1);
+			}
+		
+			qapply(webpages_qp, print_webpage);
+			printf("------\n");
+	 
+			id += 1;
+		}
+		webpage_delete(pagep);
+		pagep = qget(webpages_qp);
+	}
+	
+	printf("REACHED THE END OF WHILE LOOP\n");
+	
+	happly(seen_urls_hp, print_urlstring);
+
+	char *result2 = (char *) hremove(seen_urls_hp, search_for_url, seed_url, sizeof(seed_url));
+	printf("RESULT: %s\n", result2);
+	
 	happly(seen_urls_hp, free_the_urls);
+	//happly(seen_urls_hp, print_urlstring);
 	
-	// Print queue of webpages
-	qapply(webpages_qp, print_webpage);
-
-	// Free seed webpage
-	webpage_delete(first_page);
-	
-	// Free all the new webpages created and close webpages_qp
-	qapply(webpages_qp, webpage_delete);
 	qclose(webpages_qp);
-
-	// Close seen_urls_hp
 	hclose(seen_urls_hp);
-
+	
 	exit(EXIT_SUCCESS);
 }
