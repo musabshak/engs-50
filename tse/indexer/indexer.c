@@ -40,10 +40,10 @@ int main(int argc, char *argv[]) {
 	// if (NormalizeWords(word)!=NULL){
 	// 	printf("%s\n", word);
 	// }
-	char **htmlword;
+	char *htmlword;
 	int cur_pos = 0;
-	while (webpage_getNextWord(loaded_page,cur_pos,htmlword)<webpage_getHTMLlen(page)){
-		printf("%s\n", *htmlword);
+	while (webpage_getNextWord(loaded_page,cur_pos,*htmlword)<webpage_getHTMLlen(loaded_page)){
+		printf("%s\n", htmlword);
 	}
 
 
