@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <queue.h>
 #include <hash.h>
+#include <pageio.h>
 #include <webpage.h>
 #include <stdbool.h>
 #include <string.h>
@@ -58,31 +59,6 @@ bool isDirectoryExists(const char *path)
         return true;
 
     return false;
-}
-
-int32_t pagesave(webpage_t *pagep, int id, char *dirname) {
-	FILE *fp;
-	char full_path[100];
-	sprintf(full_path, "%s/%d", dirname, id);
-
-	// printf("%s\n", full_path);
-
-	fp = fopen(full_path, "w");
-	if (fp==NULL) {
-		printf("Error: file unable to be created!\n");
-		return 1;
-	}
-
-	fprintf(fp,
-					"%s\n%d\n%d\n%s\n",
-					webpage_getURL(pagep),
-					webpage_getDepth(pagep),
-					webpage_getHTMLlen(pagep),
-					webpage_getHTML(pagep));
-
-	fclose(fp);
-	
-	return 0;
 }
 
 void expand(hashtable_t *seen_urls_hp, queue_t *webpages_qp, webpage_t *pagep, int depth) {
