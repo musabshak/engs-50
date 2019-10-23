@@ -24,18 +24,19 @@ int32_t pagesave(webpage_t *pagep, int id, char *dirnm) {
 	}
 
 	fprintf(fp,
-					"%s\n%d\n%d\n%s\n",
-					webpage_getURL(pagep),
-					webpage_getDepth(pagep),
-					webpage_getHTMLlen(pagep),
-					webpage_getHTML(pagep));
+			"%s\n%d\n%d\n%s",
+			webpage_getURL(pagep),
+			webpage_getDepth(pagep),
+			webpage_getHTMLlen(pagep),
+			webpage_getHTML(pagep)
+			);
 
 	fclose(fp);
 
 	return 0;
 }
 
-webpage_t *pageload(int id, char*dirnm) {
+webpage_t *pageload(int id, char *dirnm) {
 	/* Formatting the path to open the file	 */
 	FILE *fp;
 	char full_path[100];
@@ -45,24 +46,35 @@ webpage_t *pageload(int id, char*dirnm) {
 	fp = fopen(full_path, "r");
 	if (fp==NULL) {
 		printf("Error: file unable to be read!\n");
-		return 1;
+		return NULL;
 	}
 
 	/* Scanning the file and storing read values */
 	char url[300];
 	int depth;
 	int html_len;
-	char html[20000];
-	fscanf(fp,"%s\n%d\n%d\n%s\n",url,depth,html_len);
+	char html[2000000];
+	fscanf(fp,"%s\n%d\n%d\n", url, &depth, &html_len);
+
+	int c;
+	int pos = 0;
+	while(1) {
+		c = fgetc(fp);
+		if (feof(fp) ) {
+			break;
+		}
+		//printf("%c", c);
+		pos += sprintf(&html[pos], "%c", c);
+	}
+
+	//printf("%s", html);
+	//printf("UPDATED2\n");
 
 	/* Creating new webpage out of scanned variables */
 	webpage_t *new_page = (webpage_t *) malloc(sizeof(webpage_t *));
-	new_page = webpage_new(url,depth,html);
+	new_page = webpage_new(url, depth, html);
 
 	fclose(fp);
 	return new_page;
-
-
-
 }
 
