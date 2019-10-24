@@ -9,6 +9,7 @@
  * 
  */
 #include <webpage.h>
+#include <string.h>
 
 int32_t pagesave(webpage_t *pagep, int id, char *dirnm) {
 	FILE *fp;
@@ -53,7 +54,7 @@ webpage_t *pageload(int id, char *dirnm) {
 	char url[300];
 	int depth;
 	int html_len;
-	char html[2000000];
+	char *html = (char *) malloc(sizeof(char)*20000000);
 	fscanf(fp,"%s\n%d\n%d\n", url, &depth, &html_len);
 
 	int c;
@@ -65,14 +66,14 @@ webpage_t *pageload(int id, char *dirnm) {
 		}
 		//printf("%c", c);
 		pos += sprintf(&html[pos], "%c", c);
+
 	}
 
 	//printf("%s", html);
-	//printf("UPDATED2\n");
 
 	/* Creating new webpage out of scanned variables */
-	webpage_t *new_page = (webpage_t *) malloc(sizeof(webpage_t *));
-	new_page = webpage_new(url, depth, html);
+	webpage_t *new_page = webpage_new(url, depth, html);
+	printf("Finished PAGEIO\n");
 
 	fclose(fp);
 	return new_page;

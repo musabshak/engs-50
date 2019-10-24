@@ -82,8 +82,7 @@ void expand(hashtable_t *seen_urls_hp, queue_t *webpages_qp, webpage_t *pagep, i
 			qput(webpages_qp, webpage_new(url_result, depth, NULL));
 		 }
 		else { // Free the urls (external or seen) that don't make it into the hashtable
-			char *tmp = url_result;
-			free(tmp);
+			free(url_result);
 		}
 	}
 }
