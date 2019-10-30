@@ -73,7 +73,7 @@ webpage_t *pageload(int id, char *dirnm) {
 
 	/* Creating new webpage out of scanned variables */
 	webpage_t *new_page = webpage_new(url, depth, html);
-	printf("Finished PAGEIO\n");
+	// printf("Finished PAGEIO\n");
 
 	fclose(fp);
 	return new_page;

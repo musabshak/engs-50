@@ -73,7 +73,7 @@ hashtable_t* hopen(uint32_t hsize) {
 		return NULL;
 	}
 
-	htp->htable = (queue_t *) malloc(hsize * sizeof(queue_t *));
+	htp->htable = (queue_t **) malloc(hsize * sizeof(queue_t *));
 	htp->size = hsize;
 
 	int i = 0;
