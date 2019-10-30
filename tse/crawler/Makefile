@@ -16,6 +16,10 @@ run_crawler2: crawler
 	rm ../pages/*
 	crawler "https://thayer.github.io/engs50/" "../pages" 2
 
+run_crawler3: crawler
+	rm ../pages/*
+	crawler "https://thayer.github.io/engs50/" "../pages" 3
+
 clean:
 	rm -f *.o crawler
 

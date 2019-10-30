@@ -24,5 +24,8 @@ int main() {
 	printf("%s; %d; %d\n", webpage_getURL(loaded_page1),
 				webpage_getDepth(loaded_page1), webpage_getHTMLlen(loaded_page1));
 
+	webpage_delete(loaded_page);
+	webpage_delete(loaded_page1);
+
 	return 0;
 }

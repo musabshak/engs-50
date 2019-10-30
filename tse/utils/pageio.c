@@ -16,8 +16,6 @@ int32_t pagesave(webpage_t *pagep, int id, char *dirnm) {
 	char full_path[100];
 	sprintf(full_path, "%s/%d", dirnm, id);
 
-	// printf("%s\n", full_path);
-
 	fp = fopen(full_path, "w");
 	if (fp==NULL) {
 		printf("Error: file unable to be created!\n");
@@ -33,7 +31,6 @@ int32_t pagesave(webpage_t *pagep, int id, char *dirnm) {
 			);
 
 	fclose(fp);
-
 	return 0;
 }
 
@@ -54,8 +51,8 @@ webpage_t *pageload(int id, char *dirnm) {
 	char url[300];
 	int depth;
 	int html_len;
-	char *html = (char *) malloc(sizeof(char)*20000000);
 	fscanf(fp,"%s\n%d\n%d\n", url, &depth, &html_len);
+	char *html = (char *) malloc(200000000);
 
 	int c;
 	int pos = 0;
@@ -64,16 +61,14 @@ webpage_t *pageload(int id, char *dirnm) {
 		if (feof(fp) ) {
 			break;
 		}
-		//printf("%c", c);
 		pos += sprintf(&html[pos], "%c", c);
 
 	}
-
-	//printf("%s", html);
+	html[pos] = '\0';
 
 	/* Creating new webpage out of scanned variables */
 	webpage_t *new_page = webpage_new(url, depth, html);
-	printf("Finished PAGEIO\n");
+	//printf("Finished PAGEIO\n");
 
 	fclose(fp);
 	return new_page;
