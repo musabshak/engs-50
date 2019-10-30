@@ -20,6 +20,9 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
+
+/*STRUCTS*/
+/* Type of element in indexer that holds all the documents that present it*/
 typedef struct word {
 	char *normalized_word;
 	queue_t *webpages_qp;
@@ -30,19 +33,23 @@ typedef struct webpagenode {
 	int id;
 } webpagenode_t;
 
+/*HELPER FUNCTIONS*/
+/* Normalize a given string by setting everything to lower case 
+ * All strings lower than 3 are discarded
+ *  */
 char *NormalizeWord(char *str) {
 	int len = strlen(str);
-	/* If lower than 3 character long, then discard*/
+	// If lower than 3 character long, then discard
 	if (len<3) {
 		return NULL;
 	}
-	/* Loop through characters */
+	// Loop through characters
 	for (int i = 0; i < len; i++){
-		/* Check if the character is a not letter */
+		// Check if the character is a not letter 
 		if (isalpha(str[i])==0) {
 			return NULL;
 		}
-		/* Convert to lowercase*/
+		// Convert to lowercase
 		str[i] = (char) tolower(str[i]);
 	}
 	return str;
@@ -158,6 +165,7 @@ word_t* make_word(char *norm_htmlword) {
 	return norm_htmlword_obj;
 }
 
+/*MAIN CODE*/
 int main(int argc, char *argv[]) {
 	if (argc != 3) {
 		printf("usage: indexer <page_dir> <indexnm>\n");
