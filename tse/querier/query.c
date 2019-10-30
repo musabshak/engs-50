@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
         }
         else { /* Valid Input */
             printf("%s\n", normalized_input);
-            /* Convert normalized_input intro array of words */
+            /* Convert normalized_input into array of words */
             char *input_array[100]; 
             int num_words = str_to_array(input_array, 
                                            normalized_input);
