@@ -27,6 +27,10 @@ typedef struct webpagenode {
 	int id;
 } webpagenode_t;
 
+/** 
+Convert string to lowercase. Return NULL if any non-alphabet
+character in string.
+**/
 char* str_tolower(char *str) {
     int len = strlen(str);
 
@@ -41,6 +45,19 @@ char* str_tolower(char *str) {
     return str;
 }
 
+/**
+Get a query from user and normalize it.
+Removes from query: 
+- words with length < 3
+- "and", "or"
+
+Args
+    char *normalized_input: Empty string into which the normalized input
+    will be stored
+Returns 
+    1 if query is invalid (i.e., has non alphabet characters)
+    0 if query is valid
+**/
 int get_query(char *normalized_input) {
     char input[1000];
     printf("> ");
@@ -77,6 +94,16 @@ int get_query(char *normalized_input) {
     return invalid;
 }
 
+/** 
+Convert a string into an array of words
+
+Args
+    char *str: String to be converted
+    char **input_array: Empty array of words into which the separated words will
+                        be stored
+Returns
+    num_words: Number of words stored in input_array
+**/
 int str_to_array(char **input_array, char *str) {
     char *word = strtok(str, " ");
     int num_words = 0;
@@ -109,10 +136,51 @@ bool search_webpagenode(void *elementp, const void *keyp) {
 	}
 }
 
+/* Rank one webpage for a given query */
+/**
+Args:
+    char **input_array: Array of normalized words inputted by the user
+    int num_words: Number of words in input_array
+    int page_id: Particular page id
+    char *query_result: Empty string into which the response to the query 
+                  will be stored
+**/
+void rank_page(hashtable_t * word_htable, char **input_array, int num_words, 
+              int page_id, char *query_result) {
+    int pos = 0;
+    int min_wordcount = 99999; /* Rank: minimum of all word counts for a given page */ 
+    for (int i=0; i<num_words; i++) {
+        char *query_word = input_array[i];
+        /* Does word exist in index? */
+        word_t *resulting_word = (word_t *) hsearch(word_htable, 
+                                                    search_word, 
+                                                    query_word,
+                                                    strlen(query_word)); 
+        int word_count = 0; /* Number of occurrences of word in page */
+        if (resulting_word != NULL) {
+            /* If word exists in index, does it exist in given webpage? */     
+            queue_t *webpages_qp = resulting_word->webpages_qp;
+            webpagenode_t *pagenode = (webpagenode_t *) qsearch(webpages_qp, 
+                                                                search_webpagenode,
+                                                                &page_id);                                       
+            if (pagenode != NULL) { /* If it does, word_count is set accordingly */
+                    word_count = pagenode->word_count;
+            }
+        }
+        /* Is the word_count for this particular word lower than overall word count? */
+        if (word_count < min_wordcount) {
+            min_wordcount = word_count;
+        }
+        pos += sprintf(&query_result[pos], "%s:%d ", query_word, word_count);
+    }  
+    pos += sprintf(&query_result[pos], "-- %d; PAGE:%d", min_wordcount, page_id);
+}
+
 int main(int argc, char *argv[]) {
 
     hashtable_t *word_htable = indexload("../indexer/indexnm");
 
+    /* While user has not entered EOF */
     while (!feof(stdin)) {
         char normalized_input[1000] = "\0";
         int invalid = get_query(normalized_input);        
@@ -126,43 +194,20 @@ int main(int argc, char *argv[]) {
         else if (normalized_input[0] == 0) { /* If no input, do nothing */
             ; 
         }
-        else { /* Else print input */
-            //printf("%s\n", normalized_input);
-            char *input_array[100];
+        else { /* Valid Input */
+            printf("%s\n", normalized_input);
+            /* Convert normalized_input intro array of words */
+            char *input_array[100]; 
             int num_words = str_to_array(input_array, 
                                            normalized_input);
 
-            char query_result[200];
-            int pos = 0;
-            int min_pagecount = 99999;
-            for (int i=0; i<num_words; i++) {
-                char *query_word = input_array[i];
-                word_t *resulting_word = (word_t *) hsearch(word_htable, 
-                                                            search_word, 
-                                                            query_word,
-                                                            strlen(query_word));
-                         
-                int page_count;
-                if (resulting_word != NULL) {
-                    int page_id = 1;
-                    queue_t *webpages_qp = resulting_word->webpages_qp;
-                    webpagenode_t *pagenode = (webpagenode_t *) qsearch(webpages_qp, 
-                                                                        search_webpagenode,
-                                                                        &page_id);
-                    page_count = pagenode->word_count;
-                }
-                else {
-                    page_count = 0;
-                }
-
-                if (page_count < min_pagecount) {
-                    min_pagecount = page_count;
-                }
-                pos += sprintf(&query_result[pos], "%s:%d ", query_word, page_count);
-            }  
-            pos += sprintf(&query_result[pos], "-- %d", min_pagecount);
-
-            printf("%s\n", query_result);   
+            /* For a given query, find rank of each webpage */
+            for (int page_id=1; page_id<=2; page_id ++) {
+                char query_result[200]; /* What will be printed in response to a query */
+                rank_page(word_htable, input_array, num_words, 
+                          page_id, query_result);
+                printf("%s\n", query_result);   
+            };
 
         }
     }
