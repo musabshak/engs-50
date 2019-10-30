@@ -223,7 +223,6 @@ int main(int argc, char *argv[]) {
 			}
 
 		} /* End of while loop */
-
 		webpage_delete(loaded_page);
 	} /* End of for loop */
 

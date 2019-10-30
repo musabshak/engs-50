@@ -17,6 +17,10 @@
 #include <queue.h>
 #include <indexio.h>
 
+/**
+STRUCTS
+**/
+
 typedef struct word {
 	char *normalized_word;
 	queue_t *webpages_qp;
@@ -26,6 +30,55 @@ typedef struct webpagenode {
 	int word_count;
 	int id;
 } webpagenode_t;
+
+typedef struct document {
+    int id; 
+    char *url; 
+    int rank;
+} document_t;
+
+
+/**
+STRUCT FUNCTIONS
+**/
+
+bool search_word(void *elementp, const void *searchkeyp) {
+	word_t *word_obj = (word_t *) elementp;
+	if (strcmp(word_obj->normalized_word,(char *) searchkeyp)==0) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool search_webpagenode(void *elementp, const void *keyp) {
+	webpagenode_t *nodep = (webpagenode_t *) elementp;
+	int *key = (int *) keyp;
+	if (nodep->id == *key) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+void delete_webpagenode(void *elementp) {
+	webpagenode_t *pagenode = (webpagenode_t *) elementp;
+	free(pagenode);
+}
+
+void delete_word(void *elementp) {
+	word_t *word = (word_t *) elementp;
+	free(word->normalized_word);
+	qapply(word->webpages_qp, delete_webpagenode);
+	qclose(word->webpages_qp);
+	free(word);
+}
+
+/**
+HELPER FUNCTIONS
+**/
 
 /** 
 Convert string to lowercase. Return NULL if any non-alphabet
@@ -45,6 +98,31 @@ char* str_tolower(char *str) {
     return str;
 }
 
+/** 
+Convert a string into an array of words
+
+Args
+    char *str: String to be converted
+    char **input_array: Empty array of words into which the separated words will
+                        be stored
+Returns
+    num_words: Number of words stored in input_array
+**/
+int str_to_array(char **input_array, char *str) {
+    char *word = strtok(str, " ");
+    int num_words = 0;
+    while (word != NULL) {
+        input_array[num_words] = word;
+        word = strtok(0, " ");
+        num_words += 1;
+    }
+    return num_words;
+}
+
+/**
+OTHER FUNCTIONS
+**/
+
 /**
 Get a query from user and normalize it.
 Removes from query: 
@@ -59,7 +137,7 @@ Returns
     0 if query is valid
 **/
 int get_query(char *normalized_input) {
-    char input[1000];
+    char input[1000] = "\0";
     printf("> ");
     fgets(input, 1000, stdin);
 
@@ -94,47 +172,9 @@ int get_query(char *normalized_input) {
     return invalid;
 }
 
-/** 
-Convert a string into an array of words
 
-Args
-    char *str: String to be converted
-    char **input_array: Empty array of words into which the separated words will
-                        be stored
-Returns
-    num_words: Number of words stored in input_array
-**/
-int str_to_array(char **input_array, char *str) {
-    char *word = strtok(str, " ");
-    int num_words = 0;
-    while (word != NULL) {
-        input_array[num_words] = word;
-        word = strtok(0, " ");
-        num_words += 1;
-    }
-    return num_words;
-}
 
-bool search_word(void *elementp, const void *searchkeyp) {
-	word_t *word_obj = (word_t *) elementp;
-	if (strcmp(word_obj->normalized_word,(char *) searchkeyp)==0) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
 
-bool search_webpagenode(void *elementp, const void *keyp) {
-	webpagenode_t *nodep = (webpagenode_t *) elementp;
-	int *key = (int *) keyp;
-	if (nodep->id == *key) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
 
 /* Rank one webpage for a given query */
 /**
@@ -145,9 +185,9 @@ Args:
     char *query_result: Empty string into which the response to the query 
                   will be stored
 **/
-void rank_page(hashtable_t * word_htable, char **input_array, int num_words, 
+int rank_page(hashtable_t * word_htable, char **input_array, int num_words, 
               int page_id, char *query_result) {
-    int pos = 0;
+    //int pos = 0;
     int min_wordcount = 99999; /* Rank: minimum of all word counts for a given page */ 
     for (int i=0; i<num_words; i++) {
         char *query_word = input_array[i];
@@ -171,9 +211,55 @@ void rank_page(hashtable_t * word_htable, char **input_array, int num_words,
         if (word_count < min_wordcount) {
             min_wordcount = word_count;
         }
-        pos += sprintf(&query_result[pos], "%s:%d ", query_word, word_count);
+        
+        //pos += sprintf(&query_result[pos], "rank:%d:doc:%d:url%s", word_count, page_id, page_url);
     }  
-    pos += sprintf(&query_result[pos], "-- %d; PAGE:%d", min_wordcount, page_id);
+    //pos += sprintf(&query_result[pos], "-- %d; PAGE:%d", min_wordcount, page_id);
+
+    return min_wordcount;
+}
+
+void print_document(void *elementp) {
+    document_t *doc = (document_t *) elementp; 
+    printf("rank:%d:doc:%d:url:%s\n", doc->rank, doc->id, doc->url);
+}
+
+void delete_doc(void *elementp) {
+    document_t *doc = (document_t *) elementp; 
+    free(doc->url);
+    free(doc);
+}
+
+/**
+Given a page_id and rank, make a malloc-ed document struct.
+Load the page from the page directory based off the page_id, get the url for 
+the page (first line), malloc space for the url, and store the url in the document struct.
+**/
+document_t* make_document(int page_id, int rank) {
+    document_t *doc = (document_t *) malloc(sizeof(document_t));
+    doc->id = page_id;
+    doc->rank = rank;
+
+    /* Load page file to get the url */
+    FILE *fp;
+	char full_path[100];
+	sprintf(full_path, "%s/%d", "../pages", page_id);
+
+	/* Opening the File */
+	fp = fopen(full_path, "r");
+	if (fp==NULL) {
+		printf("Error: file unable to be read!\n");
+		return NULL;
+	}
+
+	/* Scanning the file and storing read values */
+	char url[100];
+	fscanf(fp,"%s\n", url);    
+    doc->url = malloc(strlen(url)+1);
+    strcpy(doc->url, url);
+
+    fclose(fp);
+    return doc;
 }
 
 int main(int argc, char *argv[]) {
@@ -183,6 +269,7 @@ int main(int argc, char *argv[]) {
     /* While user has not entered EOF */
     while (!feof(stdin)) {
         char normalized_input[1000] = "\0";
+        //normalized_input[0] = 0;
         int invalid = get_query(normalized_input);        
 
         if (feof(stdin)) { /* If input is EOF */
@@ -201,16 +288,27 @@ int main(int argc, char *argv[]) {
             int num_words = str_to_array(input_array, 
                                            normalized_input);
 
+            queue_t *queue_docs = qopen();
             /* For a given query, find rank of each webpage */
-            for (int page_id=1; page_id<=2; page_id ++) {
+            for (int page_id=1; page_id<=20; page_id ++) {
                 char query_result[200]; /* What will be printed in response to a query */
-                rank_page(word_htable, input_array, num_words, 
-                          page_id, query_result);
-                printf("%s\n", query_result);   
+                int rank = rank_page(word_htable, input_array, num_words, 
+                            page_id, query_result);
+                if (rank != 0) { /* If document contains all words in query */
+                    document_t *doc = make_document(page_id, rank);
+                    qput(queue_docs, doc);
+                    ;
+                }
+                //printf("%s\n", query_result);   
             };
-
+            qapply(queue_docs, print_document);
+            qapply(queue_docs, delete_doc);
+            qclose(queue_docs);
         }
     }
+
+    happly(word_htable, delete_word);
+    hclose(word_htable);
 
     return 0;
 }
