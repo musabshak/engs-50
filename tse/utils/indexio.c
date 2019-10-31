@@ -87,7 +87,8 @@ hashtable_t* indexload(char *file) {
 		/* Loops over contents of each line starting after the first token: each iteration is a space-delimited token */
 		while(1) {
 			char *page_id = strtok(0, " ");
-			if (atoi(page_id)==0) { /* End of Line */
+			//printf("hi\n");
+			if (atoi(page_id) == 0) { /* End of Line */
 				break; 
 			}
 			char *word_count = strtok(0, " ");
@@ -96,14 +97,16 @@ hashtable_t* indexload(char *file) {
 			int word_count_int = atoi(word_count);
 
 			webpagenode_t *pagenode = (webpagenode_t *) malloc(sizeof(webpagenode_t));
+		
 			pagenode->id = page_id_int;
 			pagenode->word_count = word_count_int;
 			qput(new_word->webpages_qp, pagenode);
+			
 		}
 
 	}
 	fclose(fp1);
-	//printf("Ended while loop\n");
+	
 	return word_htable;
 
 }
