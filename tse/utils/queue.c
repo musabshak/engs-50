@@ -167,9 +167,9 @@ void qconcat(queue_t *q1p, queue_t *q2p) {
 	;
 	}
 	else if (first_empty) { //first empty
-		printf("hi\n");
+		// printf("hi\n");
 		q1p->front = q2p->front;
-		printf("nnow?\n");
+		// printf("nnow?\n");
 		q1p->back = q2p->back;
 		
 	}

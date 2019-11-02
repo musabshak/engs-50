@@ -88,7 +88,10 @@ hashtable_t* indexload(char *file) {
 		while(1) {
 			char *page_id = strtok(0, " ");
 			//printf("hi\n");
-			if (atoi(page_id) == 0) { /* End of Line */
+			// if (atoi(page_id) == 0) { /* End of Line */
+			// 	break; 
+			// }
+			if (page_id==NULL) { /* End of Line */
 				break; 
 			}
 			char *word_count = strtok(0, " ");

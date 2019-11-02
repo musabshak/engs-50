@@ -107,6 +107,12 @@ void delete_webpagenode(void *elementp) {
 	free(pagenode);
 }
 
+void print_webpage_qp(void *elementp) {
+    queue_t *webpages_qp = (queue_t *) elementp;
+    qapply(webpages_qp, print_webpagenode);
+    printf("\n");
+}
+
 
 /*
  * document
@@ -127,10 +133,10 @@ typedef struct document {
  * Load the page from the page directory based off the page_id, get the url for
  * the page (first line), malloc space for the url, and store the url in the document struct.
  */
-document_t* make_document(int page_id, int rank) {
+document_t* make_document(int page_id) {
     document_t *doc = (document_t *) malloc(sizeof(document_t));
     doc->id = page_id;
-    doc->rank = rank;
+    doc->rank = 0;
 
     /** Load page file to get the url **/
     FILE *fp;
@@ -157,6 +163,18 @@ document_t* make_document(int page_id, int rank) {
 void print_document(void *elementp) {
     document_t *doc = (document_t *) elementp;
     printf("rank:%d:doc:%d:url:%s\n", doc->rank, doc->id, doc->url);
+}
+
+bool search_document(void *elementp, const void *keyp) {
+    document_t *doc = (document_t *) elementp; 
+    int *key = (int *) keyp;
+    if (doc->id == *key) {
+        return true;
+    }
+    else {
+        return false;
+    }
+
 }
 
 void delete_doc(void *elementp) {
@@ -246,7 +264,7 @@ int is_or(char *word) {
     return ans;
 }
 
-void str_arr_tostr(char **input_array, int arr_size, char *dest_str) {
+void strarr_to_str(char **input_array, int arr_size, char *dest_str) {
     for (int i=0; i<arr_size; i++) {
         strcat(dest_str, input_array[i]);
         strcat(dest_str, " ");
@@ -282,11 +300,11 @@ int get_query(char **input_array) {
     if (strlen(input_str) != 0) {
         input_str[strlen(input_str)-1] = '\0';
     }
-
     char *word = strtok(input_str, " ");
     int num_tokens = 0;
     while (word != NULL) {
-        input_array[num_tokens] = word;
+        input_array[num_tokens] = (char *) malloc(strlen(word)+1);
+        strcpy(input_array[num_tokens], word);
         word = strtok(0, " ");
         num_tokens += 1;
     }
@@ -303,13 +321,14 @@ int normalize_query(char **input_array, int num_tokens,
 
     char *first_token = input_array[0];
     char *last_token = input_array[num_tokens-1];
+    //printf("first: %s; last: %s\n", first_token, last_token);
 
     if (is_and(first_token) || is_or(first_token)  ||
         is_and(last_token)  || is_or(last_token)) {
             valid = 0;
             return valid;
         }
-
+    // printf("so far so good\n");
     int lastseen_and_or = 0;
     for (int i=0; i<num_tokens; i++) {
         char *token = str_tolower(input_array[i]);
@@ -342,7 +361,7 @@ int normalize_query(char **input_array, int num_tokens,
     return valid;
  }
 
-int find_min_rank(hashtable_t *index, char *and_str, int page_id) {
+int find_min_wc(hashtable_t *index, char *and_str, int page_id) {
     int min_wordcount = 99999;
     char *word = strtok(and_str, " ");
     while (word != NULL) {
@@ -356,73 +375,181 @@ int find_min_rank(hashtable_t *index, char *and_str, int page_id) {
                                                     search_word, 
                                                     word,
                                                     strlen(word));
-        if (resulting_word != NULL) {
-            //printf("word found in index\n");
-            queue_t *webpages_qp = resulting_word->webpages_qp;
-            webpagenode_t *pagenode = (webpagenode_t *) qsearch(webpages_qp, 
+        //printf("word found in index\n");
+        queue_t *webpages_qp = resulting_word->webpages_qp;
+        webpagenode_t *pagenode = (webpagenode_t *) qsearch(webpages_qp, 
                                                                 search_webpagenode, 
                                                                 &page_id);
-
-            //qapply(webpages_qp, print_webpagenode);
-            if (pagenode != NULL) {
+        //qapply(webpages_qp, print_webpagenode);
                 // printf("pagenode found for page: %d\n", page_id);
-                word_count += pagenode->word_count;
-            }
-        }
+        word_count += pagenode->word_count;
         if (word_count < min_wordcount) {
             min_wordcount = word_count;
         }
-
         word = strtok(0, " ");
     }
     return min_wordcount;
 }
 
-/*
- * Rank one webpage for a given query
- * Args:
- * 		char **input_array: Array of normalized words inputted by the user
- * 		int num_words: Number of words in input_array
- * 		int page_id: Particular page id
- * 		char *query_result: Empty string into which the response to the query
- *      will be stored
- */
-int rank_page(hashtable_t * index, char **normalized_input_array, 
-             int num_valid_tokens, int page_id, char *normalized_inputstr) {
+void intersect_webpages_qp(queue_t *all_webpages_qp, queue_t *intersection) {
+    
+    queue_t *first_qp = (queue_t *) qget(all_webpages_qp);
 
-    int rank = 0;
-    while(1) {
-        char *and_str = strstr(normalized_inputstr, " or ");
-        if (and_str) {
-        *and_str = 0;
+    if (first_qp == NULL) {
+        return ;
+    }
+    webpagenode_t *first_qp_pagenode = (webpagenode_t *) qget(first_qp);
+    while (first_qp_pagenode != NULL) {
+        int first_qp_pagenode_id = first_qp_pagenode->id;
+        bool pagenode_in_intersection = true;
+        queue_t *ith_qp = (queue_t *) qget(all_webpages_qp); 
+        queue_t * removed_queues_qp = qopen();
+        while(ith_qp != NULL) {
+            if (qsearch(ith_qp, search_webpagenode, 
+                        &first_qp_pagenode_id) == NULL) {
+                pagenode_in_intersection = false;
+                qput(removed_queues_qp, ith_qp);
+                break;
+            }
+            qput(removed_queues_qp, ith_qp);
+            ith_qp = qget(all_webpages_qp);
         }
-        // char and_str_input[1000];
-        // strcpy(and_str_input, normalized_inputstr);
-        printf("res: %s\n", normalized_inputstr);
-        rank += find_min_rank(index, normalized_inputstr, page_id);
-        if (!and_str) {
-             break;
+        if (pagenode_in_intersection) {
+            qput(intersection, first_qp_pagenode);
         }
-        normalized_inputstr = and_str + 4;
+        qconcat(all_webpages_qp, removed_queues_qp);
+        first_qp_pagenode = qget(first_qp);
+    }
+    qput(all_webpages_qp, first_qp);
+
+}
+
+void cpy_webpages_qp(queue_t *dest_qp, queue_t *src_qp) {
+    webpagenode_t *pagenode = qget(src_qp);
+    queue_t * tmp = qopen(); // MALLOC (freed by concat)
+    while (pagenode != NULL) {
+        //webpagenode_t *nodecpy = (webpagenode_t *) malloc(sizeof(webpagenode_t));
+        //memcpy(nodecpy, pagenode, sizeof(webpagenode_t));
+        qput(dest_qp, pagenode);
+        qput(tmp, pagenode);
+        pagenode = qget(src_qp);
+    }
+    qconcat(src_qp, tmp);
+}
+
+void free_webpage_qp(void *elementp) {
+    queue_t * webpage_qp = (queue_t *) elementp;
+    qclose(webpage_qp);
+}
+
+void process_and(hashtable_t * index, queue_t *docs_qp, char *and_str) {
+    // loop through and_str, skipping "and" words
+    // get intersection of pages for each word
+    // loop through intersection (one iteration: one page_node, and_str)
+
+    char and_strcpy1[strlen(and_str)+1];
+    strcpy(and_strcpy1, and_str);
+    queue_t *all_webpage_qs_qp = qopen(); // MALLOC
+    int all_in_index = true;
+
+    char *word = strtok(and_strcpy1, " ");
+    while (word != NULL) {
+        printf("word: %s\n", word);
+        if (is_and(word)) {
+            word = strtok(0, " ");
+            continue;
+        }
+        word_t *resulting_word = (word_t *) hsearch(index, 
+                                                    search_word, 
+                                                    word,
+                                                    strlen(word));
+        if (resulting_word != NULL) {
+            printf("ONCE\n");
+            printf("word found in index\n");
+            queue_t *webpages_qp = qopen(); // MALLOC
+            cpy_webpages_qp(webpages_qp, resulting_word->webpages_qp);
+            //printf("testing: \n");
+            //qapply(webpages_qp, print_webpagenode);
+            qput(all_webpage_qs_qp, webpages_qp);
+        }  
+        else {
+            all_in_index = false;
+        }
+        word = strtok(0, " ");
+    }
+    qapply(all_webpage_qs_qp, print_webpage_qp);
+    queue_t *intersection = qopen(); // MALLOC
+    if (all_in_index) {
+        intersect_webpages_qp(all_webpage_qs_qp, intersection);
     }
 
-    printf("rank: %d\n", rank);
-    return rank;
+
+    qapply(all_webpage_qs_qp, free_webpage_qp);
+    qclose(all_webpage_qs_qp);
+
+
+    printf("intersection: ");
+    qapply(intersection, print_webpagenode);
+    printf("\n");
+    webpagenode_t *intersected_page = (webpagenode_t *) qget(intersection);
+    while(intersected_page != NULL) {
+        char and_strcpy2[strlen(and_str)+1];
+        strcpy(and_strcpy2, and_str);
+
+        int intersected_page_id = intersected_page->id;
+        document_t *resulting_doc = (document_t *) qsearch(docs_qp, search_document, 
+                                                    &intersected_page_id);
+        if (resulting_doc != NULL) {
+            resulting_doc->rank += find_min_wc(index, and_strcpy2, intersected_page_id);
+        }
+        else {
+            document_t *new_doc = make_document(intersected_page_id); // MALLOC (freed in main)
+            new_doc->rank = find_min_wc(index, and_strcpy2, intersected_page_id);
+            qput(docs_qp, new_doc);
+        }
+        intersected_page = qget(intersection);
+    }   
+    qclose(intersection);
+
+}
+
+void process_query(hashtable_t * index, queue_t *docs_qp, char *input_str) {
+
+    while(1) {
+        char *tmp_str = strstr(input_str, " or ");
+        if (tmp_str) {
+        *tmp_str = 0;
+        }
+        printf("str_split: %s\n", input_str);
+        process_and(index, docs_qp, input_str);
+        if (!tmp_str) {
+             break;
+        }
+        input_str = tmp_str + 4;
+    }
+
+    printf("end of query\n");
 }
 
 int main(int argc, char *argv[]) {
 
-    hashtable_t *index = indexload("../indexer/indexnm");
+    hashtable_t *index = indexload("../indexer/indexnm_test");
+    
     printf("loaded\n");
     //happly(index, print_word);
     
-
     /* While user has not entered EOF */
     while (!feof(stdin)) {
         char *input_array[100]; 
         char *normalized_input_array[100];
         int num_tokens = get_query(input_array);
+
         int num_valid_tokens = 0;
+
+        // for (int i=0; i<num_tokens; i++) {
+        //     printf("word: %s\n", input_array[i]);
+        // }
+
         int valid = normalize_query(input_array, 
                                       num_tokens, 
                                       normalized_input_array, 
@@ -438,35 +565,31 @@ int main(int argc, char *argv[]) {
             printf("INVALID\n");
         }
         else if (num_valid_tokens != 0) { /* Valid Input */
-            print_word_array(normalized_input_array, num_valid_tokens);     
+            //print_word_array(normalized_input_array, num_valid_tokens);     
             char normalized_inputstr[1000] = "";
-            str_arr_tostr(normalized_input_array, num_valid_tokens,
+            strarr_to_str(normalized_input_array, num_valid_tokens,
                           normalized_inputstr);
-            queue_t *queue_docs = qopen();
+            queue_t *docs_qp = qopen();
 
-            /* For a given query, find rank of each webpage */
-            for (int page_id=13; page_id<=18; page_id ++) {
+            // char normalized_inputstrcpy[100];
+            // strcpy(normalized_inputstrcpy,normalized_inputstr);
 
-                char normalized_inputstrcpy[100];
-                strcpy(normalized_inputstrcpy,normalized_inputstr);
-                printf("normalized_array: ");
-                print_word_array(normalized_input_array, num_valid_tokens);
-                printf("pageid: %d; norm_str: %s\n", page_id, normalized_inputstrcpy);
+            printf("norm_array: ");
+            print_word_array(normalized_input_array, num_valid_tokens);
+            printf("norm_str: %s\n", normalized_inputstr);
+            
+            process_query(index, docs_qp, normalized_inputstr);
 
-                int rank = rank_page(index, normalized_input_array, 
-                                     num_valid_tokens, page_id, normalized_inputstrcpy);
-                printf("id: %d; rank: %d\n\n", page_id, rank);
-                if (rank != 0) { /* If document contains all words in query */
-                    document_t *doc = make_document(page_id, rank);
-                    qput(queue_docs, doc);
-                    ;
-                }
-            }
-            qapply(queue_docs, print_document);
-            qapply(queue_docs, delete_doc);
-            qclose(queue_docs);
+            qapply(docs_qp, print_document);
+            qapply(docs_qp, delete_doc);
+            qclose(docs_qp);
+        }
+
+        for (int i=0; i<num_tokens; i++) {
+            free(input_array[i]);
         }
     }
+
 
     happly(index, delete_word);
     hclose(index);
