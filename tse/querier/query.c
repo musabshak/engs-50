@@ -15,6 +15,8 @@
 #include <indexio.h>
 #include <stdbool.h>
 
+static FILE *OUTPUT_FP;
+
 				/*
 				 *
 				 * STRUCTS & STRUCT FUNCTIONS
@@ -160,9 +162,14 @@ document_t* make_document(int page_id) {
     return doc;
 }
 
-void print_document(void *elementp) {
+void print_document_to_stdout(void *elementp) {
     document_t *doc = (document_t *) elementp;
     printf("rank:%d:doc:%d:url:%s\n", doc->rank, doc->id, doc->url);
+}
+
+void print_document_to_file(void *elementp) {
+    document_t *doc = (document_t *) elementp;
+    fprintf(OUTPUT_FP, "rank:%d:doc:%d:url:%s\n", doc->rank, doc->id, doc->url);
 }
 
 bool search_document(void *elementp, const void *keyp) {
@@ -234,11 +241,11 @@ int str_to_array(char **input_array, char *str) {
 /*
  * Print an array of words
  */
-void print_word_array(char **word_array, int arr_len) {
+void print_word_array(char **word_array, int arr_len, FILE *output_fp) {
     for (int i=0; i<arr_len; i++) {
-        printf("%s ", word_array[i]);
+        fprintf(output_fp, "%s ", word_array[i]);
     }
-    printf("\n");
+    fprintf(output_fp, "\n");
 }
 
 /*
@@ -291,21 +298,22 @@ void strarr_to_str(char **input_array, int arr_size, char *dest_str) {
  * 		1 if query is invalid (i.e., has non alphabet characters)
  *  	0 if query is valid
  */
-int get_query(char **input_array) {
+int get_query(char **input_array, FILE *input_fp, FILE *output_fp) {
     char input_str[1000] = "\0";
-    printf("> ");
-    fgets(input_str, 1000, stdin);
+
+    fprintf(output_fp, "> ");
+    fgets(input_str, 1000, input_fp);
 
     /* Replace '\n' at end of input with '\0' */
     if (strlen(input_str) != 0) {
         input_str[strlen(input_str)-1] = '\0';
     }
-    char *word = strtok(input_str, " ");
+    char *word = strtok(input_str, " \t");
     int num_tokens = 0;
     while (word != NULL) {
         input_array[num_tokens] = (char *) malloc(strlen(word)+1);
         strcpy(input_array[num_tokens], word);
-        word = strtok(0, " ");
+        word = strtok(0, " \t");
         num_tokens += 1;
     }
     return num_tokens;
@@ -454,7 +462,7 @@ void process_and(hashtable_t * index, queue_t *docs_qp, char *and_str) {
 
     char *word = strtok(and_strcpy1, " ");
     while (word != NULL) {
-        printf("word: %s\n", word);
+        //printf("word: %s\n", word);
         if (is_and(word)) {
             word = strtok(0, " ");
             continue;
@@ -464,8 +472,8 @@ void process_and(hashtable_t * index, queue_t *docs_qp, char *and_str) {
                                                     word,
                                                     strlen(word));
         if (resulting_word != NULL) {
-            printf("ONCE\n");
-            printf("word found in index\n");
+            //printf("ONCE\n");
+            //printf("word found in index\n");
             queue_t *webpages_qp = qopen(); // MALLOC
             cpy_webpages_qp(webpages_qp, resulting_word->webpages_qp);
             //printf("testing: \n");
@@ -477,7 +485,7 @@ void process_and(hashtable_t * index, queue_t *docs_qp, char *and_str) {
         }
         word = strtok(0, " ");
     }
-    qapply(all_webpage_qs_qp, print_webpage_qp);
+    //qapply(all_webpage_qs_qp, print_webpage_qp);
     queue_t *intersection = qopen(); // MALLOC
     if (all_in_index) {
         intersect_webpages_qp(all_webpage_qs_qp, intersection);
@@ -488,9 +496,9 @@ void process_and(hashtable_t * index, queue_t *docs_qp, char *and_str) {
     qclose(all_webpage_qs_qp);
 
 
-    printf("intersection: ");
-    qapply(intersection, print_webpagenode);
-    printf("\n");
+    // printf("intersection: ");
+    // qapply(intersection, print_webpagenode);
+    // printf("\n");
     webpagenode_t *intersected_page = (webpagenode_t *) qget(intersection);
     while(intersected_page != NULL) {
         char and_strcpy2[strlen(and_str)+1];
@@ -520,7 +528,7 @@ void process_query(hashtable_t * index, queue_t *docs_qp, char *input_str) {
         if (tmp_str) {
         *tmp_str = 0;
         }
-        printf("str_split: %s\n", input_str);
+        //printf("str_split: %s\n", input_str);
         process_and(index, docs_qp, input_str);
         if (!tmp_str) {
              break;
@@ -528,21 +536,94 @@ void process_query(hashtable_t * index, queue_t *docs_qp, char *input_str) {
         input_str = tmp_str + 4;
     }
 
-    printf("end of query\n");
+    //printf("end of query\n");
+}
+
+bool file_exists(const char * filename) {
+
+	FILE *file;
+    if ((file = fopen(filename, "r"))) {
+        fclose(file);
+        return true;
+    }
+    return false;
+}
+
+void print_highest_ranked(queue_t *docs_qp, FILE *output_fp) {
+	int highest_rank = 0;
+	int highest_ranked_id = -1;
+	queue_t *tmp = qopen();
+	document_t *doc = qget(docs_qp);
+	if (doc==NULL) {
+		//printf("\n");
+		qclose(tmp);
+		return;
+	}
+	while (doc != NULL) {
+		if (doc->rank > highest_rank) {
+			highest_rank = doc->rank;
+			highest_ranked_id = doc->id;
+		}
+		qput(tmp, doc);
+		doc = qget(docs_qp);
+	}
+	qconcat(docs_qp, tmp);
+
+	document_t *highest_ranked_doc = qsearch(docs_qp, search_document, &highest_ranked_id);
+	fprintf(output_fp, "highest_rank:%d:doc:%d:url:%s\n", highest_ranked_doc->rank,
+			highest_ranked_doc->id, highest_ranked_doc->url);
 }
 
 int main(int argc, char *argv[]) {
 
-    hashtable_t *index = indexload("../indexer/indexnm_test");
-    
+    if (argc != 3 && argc != 6) {
+        printf("usage: query <pageDirectory> <indexFile> [-q] input_file output_file\n");
+        return 1;
+    }
+    else if (argc == 6 && (strcmp(argv[3], "-q") != 0)) {
+        printf("usage: query <pageDirectory> <indexFile> [-q]\n");
+        return 1;
+    }
+    //printf("??\n");
+    FILE *input_fp;
+
+    bool quiet = false;
+    if (argc == 6 && strcmp(argv[3], "-q") == 0) {
+        input_fp = fopen(argv[4], "r");
+        quiet = true;
+        OUTPUT_FP = fopen(argv[5], "w");
+    }
+    else {
+        printf("here\n");
+        input_fp = stdin;
+        OUTPUT_FP = stdout;
+    }
+
+    char *index_file = argv[2];
+    char *page_dir = argv[1];
+
+    if (!file_exists(index_file)) {
+    	char cmd[100];
+    	cmd[0]=0;
+    	strcat(cmd, "../indexer/indexer ");
+    	strcat(cmd, page_dir);
+    	strcat(cmd, " ");
+    	strcat(cmd, index_file);
+    	printf("cmd: %s\n", cmd);
+		system(cmd);
+    }
+
+
+    hashtable_t *index = indexload(index_file);
+
     printf("loaded\n");
     //happly(index, print_word);
-    
+
     /* While user has not entered EOF */
-    while (!feof(stdin)) {
-        char *input_array[100]; 
+    while (!feof(input_fp)) {
+        char *input_array[100];
         char *normalized_input_array[100];
-        int num_tokens = get_query(input_array);
+        int num_tokens = get_query(input_array, input_fp, OUTPUT_FP);
 
         int num_valid_tokens = 0;
 
@@ -550,22 +631,24 @@ int main(int argc, char *argv[]) {
         //     printf("word: %s\n", input_array[i]);
         // }
 
-        int valid = normalize_query(input_array, 
-                                      num_tokens, 
-                                      normalized_input_array, 
-                                      &num_valid_tokens);  
+        int valid = normalize_query(input_array,
+                                      num_tokens,
+                                      normalized_input_array,
+                                      &num_valid_tokens);
 
-        if (feof(stdin)) { /* If input is EOF */
-            printf("\n"); 
-        } 
+        if (feof(input_fp)) { /* If input is EOF */
+            fprintf(OUTPUT_FP, "\n");
+        }
         else if (num_tokens == 0) { /* If no input, do nothing */
             continue;
         }
         else if (!valid) { /* If input is invalid */
-            printf("INVALID\n");
+            fprintf(OUTPUT_FP, "INVALID\n");
         }
         else if (num_valid_tokens != 0) { /* Valid Input */
-            //print_word_array(normalized_input_array, num_valid_tokens);     
+
+        	print_word_array(normalized_input_array, num_valid_tokens, OUTPUT_FP);
+
             char normalized_inputstr[1000] = "";
             strarr_to_str(normalized_input_array, num_valid_tokens,
                           normalized_inputstr);
@@ -574,13 +657,20 @@ int main(int argc, char *argv[]) {
             // char normalized_inputstrcpy[100];
             // strcpy(normalized_inputstrcpy,normalized_inputstr);
 
-            printf("norm_array: ");
-            print_word_array(normalized_input_array, num_valid_tokens);
-            printf("norm_str: %s\n", normalized_inputstr);
-            
+            // printf("norm_array: ");
+            // print_word_array(normalized_input_array, num_valid_tokens);
+            // printf("norm_str: %s\n", normalized_inputstr);
+
             process_query(index, docs_qp, normalized_inputstr);
 
-            qapply(docs_qp, print_document);
+           if (!quiet) {
+           	qapply(docs_qp, print_document_to_stdout);
+           }
+           else {
+           	qapply(docs_qp, print_document_to_file);
+           }
+            print_highest_ranked(docs_qp, OUTPUT_FP);
+
             qapply(docs_qp, delete_doc);
             qclose(docs_qp);
         }
@@ -590,6 +680,10 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    if (input_fp != stdin) {
+        fclose(input_fp);
+        fclose(OUTPUT_FP);
+    }
 
     happly(index, delete_word);
     hclose(index);

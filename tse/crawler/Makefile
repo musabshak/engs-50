@@ -1,8 +1,15 @@
 CFLAGS=-Wall -pedantic -std=c11 -I ../utils -L ../lib -g
-LIBS=-lutils -lcurl
+LIBS=-lutils -lcurl -lpthread
 
 crawler: crawler.c
 	gcc $(CFLAGS) crawler.c $(LIBS) -o $@
+
+conc_crawler: conc_crawler.c
+	gcc $(CFLAGS) conc_crawler.c $(LIBS) -o $@
+
+run_conc_crawler1: conc_crawler
+	rm ../pages/*
+	conc_crawler "https://thayer.github.io/engs50/" "../pages" 1
 
 run_crawler0: crawler
 	rm ../pages/*
