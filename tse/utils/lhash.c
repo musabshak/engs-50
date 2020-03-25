@@ -1,8 +1,11 @@
-/* 
- * hash.c -- implements a generic hash table as an indexed set of queues.
-Author: Musab Shakeel (12:50)
- *
+/* lhash.c -- Implementation of hash.c with locks (mutexes)
+ * 
+ * Author: Musab Shakeel
+ * 
+ * Refer to the lhash.h interface for function documentation
+ * 
  */
+
 #include <stdint.h>
 #include <queue.h>
 #include <stdlib.h>
@@ -10,12 +13,10 @@ Author: Musab Shakeel (12:50)
 #include <pthread.h>
 #include <hash.h>
 
-
 typedef struct lhashtable {
 	hashtable_t *htp;
 	pthread_mutex_t mutex;
 } lhashtable_t;
-
 
 lhashtable_t* lhopen(uint32_t hsize) {
 	lhashtable_t *lhtp;
@@ -47,9 +48,8 @@ void lhclose(lhashtable_t *lhtp) {
 }
 
 void *lhsearch(lhashtable_t *lhtp,
-							bool (*searchfn)(void* elementp, const void* searchkeyp),
-							const char *key,int32_t keylen){
-
+			  bool (*searchfn)(void* elementp, const void* searchkeyp),
+			  const char *key,int32_t keylen){
 	pthread_mutex_lock(&lhtp->mutex);
 	void *tmp = hsearch(lhtp->htp, searchfn, key, keylen);
 	pthread_mutex_unlock(&lhtp->mutex);
@@ -57,8 +57,8 @@ void *lhsearch(lhashtable_t *lhtp,
 }
 
 void *lhadd(lhashtable_t *lhtp,
-							bool (*searchfn)(void* elementp, const void* searchkeyp),
-							const char *key,int32_t keylen) {
+		    bool (*searchfn)(void* elementp, const void* searchkeyp),
+		    const char *key,int32_t keylen) {
 	pthread_mutex_lock(&lhtp->mutex);
 	void *output;
 	output = hsearch(lhtp->htp, searchfn, key, keylen);
@@ -67,13 +67,12 @@ void *lhadd(lhashtable_t *lhtp,
 	}
 	pthread_mutex_unlock(&lhtp->mutex);
 	return output; 
-	
 }
 
 void *lhremove(lhashtable_t *lhtp,
-							bool (*searchfn)(void* elementp, const void* searchkeyp),
-							const char *key,
-							int32_t keylen) {
+			  bool (*searchfn)(void* elementp, const void* searchkeyp),
+			  const char *key,
+			  int32_t keylen) {
 	pthread_mutex_lock(&lhtp->mutex);
 	void *tmp = hremove(lhtp->htp, searchfn, key, keylen);
 	pthread_mutex_unlock(&lhtp->mutex);

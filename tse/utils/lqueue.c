@@ -1,6 +1,13 @@
+/* lqueue.c -- Implementation of queue.c with locks (mutexes)
+ * 
+ * Author: Musab Shakeel
+ * 
+ * Refer to the lqueue.h interface for function documentation
+ * 
+ */
+
 #include <queue.h>
 #include <pthread.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -9,13 +16,11 @@
 typedef struct lqueue {
 	queue_t * qp;
 	pthread_mutex_t mutex;
-
 } lqueue_t;
 
 /* create an empty queue */
 lqueue_t* lqopen(void) {
 	lqueue_t *lqp;
-
 	if (!(lqp = (lqueue_t *) malloc(sizeof(lqueue_t)))) {
 		return NULL;
 	}
@@ -66,8 +71,8 @@ void lqapply(lqueue_t *lqp, void (*fn)(void* elementp)) {
  * returns a pointer to an element, or NULL if not found
  */
 void* lqsearch(lqueue_t *lqp,
-							bool (*searchfn)(void* elementp,const void* keyp),
-							const void* skeyp) {
+			  bool (*searchfn)(void* elementp,const void* keyp),
+			  const void* skeyp) {
 	pthread_mutex_lock(&lqp->mutex);
 	void *tmp = qsearch(lqp->qp, searchfn, skeyp);
 	pthread_mutex_unlock(&lqp->mutex);
@@ -79,8 +84,8 @@ void* lqsearch(lqueue_t *lqp,
  * NULL if not found
  */
 void* lqremove(lqueue_t *lqp,
-							bool (*searchfn)(void* elementp,const void* keyp),
-							const void* skeyp) {
+			  bool (*searchfn)(void* elementp,const void* keyp),
+			  const void* skeyp) {
 	pthread_mutex_lock(&lqp->mutex);
 	void *tmp = qremove(lqp->qp, searchfn, skeyp);
 	pthread_mutex_unlock(&lqp->mutex);

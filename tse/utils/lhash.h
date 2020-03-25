@@ -1,9 +1,10 @@
 #pragma once
 /*
- * hash.h -- A generic hash table implementation, allowing arbitrary
+ * lhash.h -- A generic, locked hash table implementation, allowing arbitrary
  * key structures.
  *
  */
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <hash.h>
