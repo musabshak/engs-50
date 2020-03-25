@@ -1,7 +1,6 @@
 CFLAGS=-Wall -pedantic -std=c11 -I. -g
 PROGRAM=queue
-OFILES=queue.o hash.o webpage.o pageio.o indexio.o
-TESTS=test1 test2 test3 test4 test5 test6 test7 test8
+OFILES=queue.o hash.o webpage.o pageio.o indexio.o lqueue.o lhash.o
 
 all: $(OFILES)
 	ar cr ../lib/libutils.a $(OFILES)
@@ -9,7 +8,4 @@ all: $(OFILES)
 
 %.o: %.c %.h 
 	gcc $(CFLAGS) -c $<
-
-clean:
-	rm -f *.o $(TESTS)
 

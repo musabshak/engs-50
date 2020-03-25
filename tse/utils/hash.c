@@ -1,12 +1,21 @@
-/* 
- * hash.c -- implements a generic hash table as an indexed set of queues.
-Author: Musab Shakeel (12:50)
+/* hash.c -- A generic hash table implementation, allowing arbitrary
+ * key structures. 
+ * 
+ * Author: Musab Shakeel & Selim Hassari
+ * 
+ * Description:
+ * Implements a hash table as a queue of queues. Any type of data can be 
+ * stored in the hash tables. The module allows for multiple hash tables 
+ * to exist at any given time.
+ * 
+ * For documention on functions, check hash.h
  *
  */
+
 #include <stdint.h>
-#include <queue.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <queue.h>
 
 /* 
  * SuperFastHash() -- produces a number between 0 and the tablesize-1.
@@ -60,101 +69,77 @@ static uint32_t SuperFastHash (const char *data,int len,uint32_t tablesize) {
 }
 
 typedef struct hashtable {
-	queue_t **htable;
+	queue_t **htable; /* Hash table is queue of queues */
 	uint32_t size;
-	
 } hashtable_t;
 
-
-hashtable_t* hopen(uint32_t hsize) {
-	hashtable_t *htp;
-	
-	if (!(htp = (hashtable_t*) malloc(sizeof(hashtable_t)))) {
+hashtable_t * hopen(uint32_t hsize) {
+	if (hsize <= 0) {
 		return NULL;
 	}
-
+	hashtable_t *htp;
+	if ( !(htp = (hashtable_t *) malloc(sizeof(hashtable_t))) ) {
+		return NULL;
+	}
 	htp->htable = (queue_t **) malloc(hsize * sizeof(queue_t *));
 	htp->size = hsize;
-
 	int i = 0;
-
 	while(i<htp->size) {
 		htp->htable[i] = qopen();
 		i += 1;
-	}
-	
-	if (htp->htable == NULL) {
-		return NULL;
-	}
-	
+	}	
 	return htp;
 }
 
 int32_t hput(hashtable_t *htp, void *ep, const char *key, int keylen) {
-
 	uint32_t index = SuperFastHash(key, keylen, htp->size);
- 
 	qput(htp->htable[index], ep);
-
 	return 0;
 }
 
 void happly(hashtable_t *htp, void (*fn)(void* ep)) {
 	int i = 0;
-
 	while (i<htp->size) {
 		queue_t * qp = htp->htable[i];
 		qapply(qp, fn);
 		//fn(htp->htable[i]);
 		//printf("\n");
 		i+=1;
-	}
-	
+	}	
 }
 
 void hclose(hashtable_t *htp) {
 	int i = 0;
-	
 	while (i<htp->size) {
 		qclose(htp->htable[i]);
 		i += 1;
 	}
-
 	free(htp->htable);
 	free(htp);
- 
-	
 }
 
 void *hsearch(hashtable_t *htp,
-							bool (*searchfn)(void* elementp, const void* searchkeyp),
-							const char *key,int32_t keylen){
+			  bool (*searchfn)(void* elementp, const void* searchkeyp),
+			  const char *key,int32_t keylen) {
 
-  uint32_t index = SuperFastHash(key, keylen, htp->size);
-
+	uint32_t index = SuperFastHash(key, keylen, htp->size);
 	if (htp->htable[index] == NULL) {
 		return NULL;
 	}
-	
 	return qsearch(htp->htable[index],searchfn,key);
-
 }
 
 void *hremove(hashtable_t *htp,
-							bool (*searchfn)(void* elementp, const void* searchkeyp),
-							const char *key,
-							int32_t keylen) {
+			  bool (*searchfn)(void* elementp, const void* searchkeyp),
+			  const char *key,
+			  int32_t keylen) {
 
 	uint32_t index = SuperFastHash(key, keylen, htp->size);
-	//If no queue there
+	/* If no queue present */
 	if (htp->htable[index] == NULL) {
 		return NULL;                                                                
 	}
-	
-	//Remove element if element is in q or not
+	/* Remove element whether element is in queue or not */
 	void *person = qremove(htp->htable[index],searchfn,key);
-
-	
 	return person;
-		
 }
