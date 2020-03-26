@@ -1,0 +1,20 @@
+CFLAGS=-Wall -pedantic -std=c11 -I. -g
+PROGRAM=queue
+
+all: test1 
+
+$(PROGRAM).o: $(PROGRAM).c $(PROGRAM).h
+	gcc $(CFLAGS) -c $(PROGRAM).c
+
+
+test1.o: test1.c $(PROGRAM).h
+	gcc $(CFLAGS) -c test1.c
+
+
+test1: test1.o $(PROGRAM).o
+	gcc $(CFLAGS) test1.o $(PROGRAM).o  -o test1 -lm
+
+
+clean:
+	rm -f *.o test1 
+
