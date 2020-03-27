@@ -6,8 +6,8 @@
  * Same functionality as crawler.c but is a multi-threaded implementation 
  * using pthreads. User can set number of threads to use
  * 
- * The crawler has the following usage: 
- * 		usage: crawler <seedurl> <pagedir> <maxdepth> <numthreads>
+ * Usage: 
+ * 		conc_crawler <seedurl> <pagedir> <maxdepth> <numthreads>
  * 
  */
 

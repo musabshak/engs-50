@@ -13,7 +13,7 @@
  * the query results will be stored by the querier.
  * 
  * 
- * Usage (non-quiet):
+ * Usage (non-quiet mode):
  *      query <pageDirectory> <indexFile> 
  * 
  * Usage (quiet mode): 
