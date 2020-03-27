@@ -8,8 +8,9 @@
  * retrieves each of those pages iteratively, storing associated files in a 
  * designated directory as a numbered file. Search is limited to a given depth
  *
- * The crawler has the following usage: 
- * 			usage: crawler <seedurl> <pagedir> <maxdepth> 
+ * Usage:
+ * 		crawler <seedurl> <pagedir> <maxdepth> 
+ * 
  * where: 
  * • seedurl is the starting url where the crawl begins
  * • pagedir is where the saved pages are stored

@@ -1,6 +1,10 @@
-/* indexio.c -- Contains the indexsave() and indexload() functions
+/* indexio.c -- Contains the indexsave() and indexload() functions that 
+ * save and load an index to a file
  * 
  * Author: Musab Shakeel
+ * 
+ * Description:
+ * 
  *  
  */
 
@@ -39,7 +43,7 @@ static void print_word(void *elementp) {
 }
 
 /* Takes an index in the form of a hash table of words and saves 
- * it to a file locally in the following format
+ * it to a file locally in the following format:
  * 
  * The index file shall contain one line for each word in the index. 
  * Each line has the format: 
@@ -61,7 +65,10 @@ int32_t indexsave(hashtable_t *word_htable, char *file) {
 	return 0;
 }
 
-/* Loads a saved index (text file) into a hash table of words */
+/* Loads a saved index (text file) into a hash table of words. Returns
+ * a pointer to the newly malloced hashtable (this will need to be freed
+ * by the user later
+ */
 hashtable_t* indexload(char *file) {
 	char *file_name = file;
 	FILE *fp1;

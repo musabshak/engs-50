@@ -1,9 +1,35 @@
-/* query.c
+/* query.c -- Querier
  * 
- * 
- * Author: Musab Shakeel
+ * Author: Musab Shakeel and Selim Hassairi
  * Created: Sat Oct 26 00:23:49 2019 (-0400)
  * 
+ * Description:
+ * The querier reads a query from the user, consults an index built
+ * by the indexer, ranks the documents fetched by the crawler according
+ * to their relevance, and prints a list of documents in rank order.
+ * 
+ * There is an option to run the querier in quiet mode ([-q]). This allows
+ * the user to input a text file of queries and specify an output file where
+ * the query results will be stored by the querier.
+ * 
+ * 
+ * Usage (non-quiet):
+ *      query <pageDirectory> <indexFile> 
+ * 
+ * Usage (quiet mode): 
+ *      query <pageDirectory> <indexFile> [-q] input_file output_file      
+ * 
+ * where: 
+ *   • pageDirectory is the path to the directory containing the crawled webpages
+ *   • indexFile is the path to the text file containing the saved index
+ *   • [-q] sets the quiet mode on
+ *   • input_file is the path to the text file containing user's queries
+ *   • output_file is the path to the output text file where query results will be 
+ *     stored
+ * 
+ * The querier checks if the specified indexFile exists. If it does not, the
+ * querier calls on the indexer to build the index based off the crawled pages 
+ * in the specified pageDirectory.
  */
 
 #include <string.h>
@@ -602,6 +628,9 @@ int main(int argc, char *argv[]) {
     char *index_file = argv[2];
     char *page_dir = argv[1];
 
+    /* If indexfile does not exist, run indexer program on given page directory
+     * to create and save the index to the specified file
+     */
     if (!file_exists(index_file)) {
     	char cmd[100];
     	cmd[0]=0;

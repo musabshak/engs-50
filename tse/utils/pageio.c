@@ -1,5 +1,5 @@
 /* pageio.c -- Defines functions to save/load webpages 
- *				to/from a local directory
+ *			   to/from a local directory
  * 
  * Author: Musab Shakeel
  * Created: Wed Oct 23 16:01:16 2019 (-0400)
@@ -13,7 +13,7 @@
  * Arguments
  * 		pagep: pointer to webpage that needs to be saved
  *		id: integer id that will be the filename
- *		dirnm: string representing the destinatino directory
+ *		dirnm: string representing the destination directory
  * Returns
  * 		0 if page file saved without errors
  * 		1 if error occurred during saving page file

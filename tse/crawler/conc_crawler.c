@@ -25,7 +25,6 @@
 #include <sys/stat.h> 
 
 /* GLOBAL VARIABLES */
-
 lhashtable_t *seen_urls_hp;
 lqueue_t *webpages_qp;
 int id;
