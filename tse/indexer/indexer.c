@@ -21,8 +21,8 @@
  * Usage: 
  * 		indexer <pagedir> <indexnm> 
  * 
- * where pagedir is directory where the saved pages exist and indexnm 
- * is the output file where index will be saved.
+ * • pagedir is directory where the saved pages exist
+ * • indexnm is the output file where index will be saved.
  * 		
  */
 

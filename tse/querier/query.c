@@ -19,7 +19,6 @@
  * Usage (quiet mode): 
  *      query <pageDirectory> <indexFile> [-q] input_file output_file      
  * 
- * where: 
  *   • pageDirectory is the path to the directory containing the crawled webpages
  *   • indexFile is the path to the text file containing the saved index
  *   • [-q] sets the quiet mode on

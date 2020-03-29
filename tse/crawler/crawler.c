@@ -11,7 +11,6 @@
  * Usage:
  * 		crawler <seedurl> <pagedir> <maxdepth> 
  * 
- * where: 
  * • seedurl is the starting url where the crawl begins
  * • pagedir is where the saved pages are stored
  * • maxdepth is the maximum depth that the crawler may crawl; it should be 
