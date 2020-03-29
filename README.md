@@ -13,22 +13,22 @@ Same functionality as the crawler but with much improved speed because of added 
 
 ### Folder structure
 #### tse/utils
-* queue.c\
+* queue.c  
 Source code for queue data strcture.
-* hash.c\
+* hash.c  
 Source code for hash table data structure.
-* pageio.c\
+* pageio.c  
 Contains functions for saving/loading webpages to/from a local directory. Used by the crawler and the indexer.
-* indexio.c\
+* indexio.c  
 Contains functions for saving/loading an index to/from a file. Used by the indexer.
-* lqueue.c\
+* lqueue.c  
 Source code for a queue implemented with mutex locks.
-* lhash.c\
+* lhash.c  
 Source code for a hash table implemented with mutex locks.
 
 #### tse/crawler
 * crawler.c
-* conc_crawler.c\
+* conc_crawler.c  
 Multi-threaded implementation of the crawler using posix threads. Webpages are retrieved concurrently. User may define number of threads to use.
 
 #### tse/indexer
@@ -46,7 +46,7 @@ Fetches a webpage from a given seed_url, extracts any embedded URLs,
 retrieves each of those pages iteratively, storing associated files in a 
 designated directory as a numbered file. Crawling mechanism is a breadth-first search in the graph of the internet, with the seed_url as the source node. A hashtable of seen_urls is maintained to avoid crawling over and fetching the same webpage multiple times. Search is limited to a given depth. 
 
-Usage:\
+Usage:  
 &emsp; &emsp; &emsp; `crawler <seedurl> <pagedir> <maxdepth>`  
 * seedurl is the starting url where the crawl begins.
 * pagedir is where the saved pages are stored.
@@ -56,7 +56,7 @@ Usage:\
 Same functionality as crawler.c but is a multi-threaded implementation 
 using pthreads. User can set number of threads to use.
 
-Usage:\
+Usage:  
 &emsp; &emsp; &emsp; `conc_crawler <seedurl> <pagedir> <maxdepth> <numthreads>`
 
 #### indexer.c 
@@ -67,14 +67,14 @@ Each element of this queue, along with the document ID, also stores
 the number of occurrences of the word in that document.
 
 The index file shall contain one line for each word in the index. 
-Each line has the format:\
+Each line has the format:  
 `<word> <docID1> <count1> <docID2> <count2> ….<docIDN> <countN>` 
 where \<word> is a string of lowercase letters, \<docIDi> is a positive 
 integer designating a document, \<counti> is a positive integer designating
 the number of occurrences of \<word> in \<docIDi>; each entry should be 
 placed on the line separated by a space.
 
-Usage:\
+Usage:  
 &emsp; &emsp; &emsp; `indexer <pagedir> <indexnm>`
 
 * pagedir is directory where the saved pages exist 
@@ -89,10 +89,10 @@ There is an option to run the querier in quiet mode [-q]. This allows
 the user to input a text file of queries and specify an output file where
 the query results will be stored by the querier.
 
-Usage (non-quiet):\
+Usage (non-quiet):  
 &emsp; &emsp; &emsp; `query <pageDirectory> <indexFile>` 
 
-Usage (quiet mode):\
+Usage (quiet mode):  
 &emsp; &emsp; &emsp; `query <pageDirectory> <indexFile> [-q] input_file output_file`      
 
 * pageDirectory is the path to the directory containing the crawled webpages.
