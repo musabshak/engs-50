@@ -1,13 +1,13 @@
 # Tiny Search Engine (TSE)
 ### Overview
 This was the culminating project for my ENGS 50: Software Development class taken during Fall '19. TSE is a simple search engine written in C. TSE is based on three subsystems: 
-1. Crawler
+1. Crawler  
 Takes a source URL, depth, and a local directory as parameters and crawls the web starting at the source URL upto the specified depth. The crawled webpages are fetched and saved into numbered files in the specified directory. 
-2. Indexer
+2. Indexer  
 Takes a directory containing crawled webpages and a file name as parameters and creates an index of words present in the crawled webpages. The index is saved locally for later use by the querier.
-3. Querier
+3. Querier  
 Answers and ranks user search queries based off the index created by the indexer.
-4. Concurrent Crawler
+4. Concurrent Crawler  
 Same functionality as the crawler but with much improved speed because of added support for multi-threading using posix threads. Webpages are concurrently retrieved using two shared resources: queue of webpages to be crawled and hash-table of seen URLs.
 
 
