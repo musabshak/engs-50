@@ -1,6 +1,6 @@
-# ab
+# Tiny Search Engine (TSE)
 ### Overview
-This was the culminating project for my ENGS 50: Software Development class taken during Fall '19. TSE is a simple search engine written in C. TSE is based on three subsystems: 
+This was the culminating project for my ENGS 50: Software Development class taken during Fall '19 at Dartmouth College. TSE is a simple search engine written in C. TSE is based on three subsystems: 
 1. Crawler  
 Takes a source URL, depth, and a local directory as parameters and crawls the web starting at the source URL upto the specified depth. The crawled webpages are fetched and saved into numbered files in the specified directory. 
 2. Indexer  
