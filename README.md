@@ -1,4 +1,4 @@
-# Tiny Search Engine (TSE)
+# ab
 ### Overview
 This was the culminating project for my ENGS 50: Software Development class taken during Fall '19. TSE is a simple search engine written in C. TSE is based on three subsystems: 
 1. Crawler  
@@ -40,7 +40,7 @@ Multi-threaded implementation of the crawler using posix threads. Webpages are r
 #### tse/pages
 Contains crawled webpages saved as files with numeric filenames.
 
-## Subsystem descriptions and usages
+### Subsystem descriptions and usages
 #### crawler.c
 Fetches a webpage from a given seed_url, extracts any embedded URLs, 
 retrieves each of those pages iteratively, storing associated files in a 
@@ -68,7 +68,7 @@ the number of occurrences of the word in that document.
 
 The index file shall contain one line for each word in the index. 
 Each line has the format:  
-`<word> <docID1> <count1> <docID2> <count2> ….<docIDN> <countN>` 
+`<word> <docID1> <count1> <docID2> <count2> ….<docIDN> <countN>`  
 where \<word> is a string of lowercase letters, \<docIDi> is a positive 
 integer designating a document, \<counti> is a positive integer designating
 the number of occurrences of \<word> in \<docIDi>; each entry should be 
@@ -115,5 +115,5 @@ Follow the following steps if you wish to run TSE:
 
 
 
-*Collaborators: Selim Hassairi*
+*Collaborators: Selim Hassairi*  
 *Course taught by Professor Stephen Taylor*
