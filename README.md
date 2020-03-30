@@ -107,10 +107,12 @@ in the specified pageDirectory.
 
 ### Running it for yourself
 Follow the following steps if you wish to run TSE:
-1. Download the repository, maintaining the same folder structure.
+1. Download the repository*, maintaining the same folder structure.
 2. Run the crawler according to the usage specified above.
 3. Run the indexer according to the usage specified above (this step is optional -- if an index is not created by the time step 4. is executed, the querier will automatically call on the indexer to build the index).
 4. Run the querier according to the usage specified above, either in interactive mode (default) or quiet mode. 
+
+/* *Please contact musabshakeel@gmail.com if you would like access to the code* 
 
 
 
