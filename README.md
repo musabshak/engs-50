@@ -6,7 +6,7 @@ Takes a source URL, depth, and a local directory as parameters and crawls the we
 2. Indexer  
 Takes a directory containing crawled webpages and a file name as parameters and creates an index of words present in the crawled webpages. The index is saved locally for later use by the querier.
 3. Querier  
-Answers and ranks user search queries based off the index created by the indexer.
+Answers user search queries and ranks them based off the index created by the indexer.
 4. Concurrent Crawler  
 Same functionality as the crawler but with much improved speed because of added support for multi-threading using posix threads. Webpages are concurrently retrieved using two shared resources: queue of webpages to be crawled and hash-table of seen URLs.
 
