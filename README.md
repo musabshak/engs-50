@@ -8,7 +8,7 @@ Takes a directory containing crawled webpages and a file name as parameters and 
 3. Querier  
 Answers user search queries and ranks them based off the index created by the indexer.
 4. Concurrent Crawler  
-Same functionality as the crawler but with much improved speed because of added support for multi-threading using posix threads. Webpages are concurrently retrieved using two shared resources: queue of webpages to be crawled and hash-table of seen URLs.
+Same functionality as the crawler but with much improved speed because of added support for multi-threading using POSIX threads. Webpages are concurrently retrieved using two shared resources: queue of webpages to be crawled and hash-table of seen URLs.
 
 
 ### Folder structure
@@ -29,7 +29,7 @@ Source code for a hash table implemented with mutex locks.
 #### tse/crawler
 * crawler.c
 * conc_crawler.c  
-Multi-threaded implementation of the crawler using posix threads. Webpages are retrieved concurrently. User may define number of threads to use.
+Multi-threaded implementation of the crawler using POSIX threads. Webpages are retrieved concurrently. User may define number of threads to use.
 
 #### tse/indexer
 * indexer.c
