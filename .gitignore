@@ -1,13 +1,1 @@
-# Crawled pages
-tse/pages
-tse/pages1
-
-# Temporary files
-*~
-
-# Object files
-*.o
-
-# VS Code files
-.project
-.vscode
+module3

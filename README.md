@@ -6,9 +6,9 @@ Takes a source URL, depth, and a local directory as parameters and crawls the we
 2. Indexer  
 Takes a directory containing crawled webpages and a file name as parameters and creates an index of words present in the crawled webpages. The index is saved locally for later use by the querier.
 3. Querier  
-Answers and ranks user search queries based off the index created by the indexer.
+Answers user search queries and ranks them based off the index created by the indexer.
 4. Concurrent Crawler  
-Same functionality as the crawler but with much improved speed because of added support for multi-threading using posix threads. Webpages are concurrently retrieved using two shared resources: queue of webpages to be crawled and hash-table of seen URLs.
+Same functionality as the crawler but with much improved speed because of added support for multi-threading using POSIX threads. Webpages are concurrently retrieved using two shared resources: queue of webpages to be crawled and hash-table of seen URLs.
 
 
 ### Folder structure
@@ -29,7 +29,7 @@ Source code for a hash table implemented with mutex locks.
 #### tse/crawler
 * crawler.c
 * conc_crawler.c  
-Multi-threaded implementation of the crawler using posix threads. Webpages are retrieved concurrently. User may define number of threads to use.
+Multi-threaded implementation of the crawler using POSIX threads. Webpages are retrieved concurrently. User may define number of threads to use.
 
 #### tse/indexer
 * indexer.c
@@ -107,10 +107,12 @@ in the specified pageDirectory.
 
 ### Running it for yourself
 Follow the following steps if you wish to run TSE:
-1. Download the repository, maintaining the same folder structure.
+1. Download the repository*, maintaining the same folder structure.
 2. Run the crawler according to the usage specified above.
 3. Run the indexer according to the usage specified above (this step is optional -- if an index is not created by the time step 4. is executed, the querier will automatically call on the indexer to build the index).
 4. Run the querier according to the usage specified above, either in interactive mode (default) or quiet mode. 
+
+*Please contact musabshakeel@gmail.com if you would like access to the code* 
 
 
 
